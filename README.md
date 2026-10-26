@@ -25,44 +25,25 @@
 
 ---
 
-## 🚀 Guía de Descarga e Instalación (Sin experiencia previa)
+## 🚀 Guía de Instalación para Windows (1 Clic)
 
-Diseñado para que cualquier persona en el taller u oficina pueda empezar a usarlo en **menos de 1 minuto**:
+El programa dispone de su propio **instalador ejecutable oficial para Windows**:
 
-```
- ┌───────────────────────┐      ┌────────────────────────┐      ┌────────────────────────┐
- │  1. Descargar el ZIP  │ ──>  │  2. Extraer la carpeta │ ──>  │  3. Doble Clic y Listo │
- │   (Enlace directo)    │      │ (Clic derecho > Extraer│      │ Generador_Placas_xTool │
- └───────────────────────┘      └────────────────────────┘      └────────────────────────┘
-```
+<div align="center">
 
-### Paso 1: Descargar
-Haz clic en el siguiente botón verde para descargar la carpeta completa del programa:
+[![Descargar Instalador](https://img.shields.io/badge/Descargar_Instalador_Oficial-Instalador__Placas__xTool__Setup.exe-44af65?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/raul-OO8/Placas-Ident/releases/download/v1.2.0/Instalador_Placas_xTool_Setup.exe)
 
-👉 [**Descargar Placas xTool (ZIP Oficial)**](https://github.com/raul-OO8/Placas-Ident/archive/refs/heads/main.zip)
+</div>
 
-*(O entra en este repositorio y haz clic en el botón verde superior `<> Code` → **Download ZIP**).*
+### Proceso de instalación en 2 pasos:
 
----
-
-### Paso 2: Descomprimir
-1. Ve a tu carpeta de **Descargas**.
-2. Haz **clic derecho** sobre el archivo `Placas-Ident-main.zip` y pulsa **«Extraer todo...»**.
-3. Elige la carpeta donde quieras tenerlo (por ejemplo en tu **Escritorio** o en `C:\Programas\Placas`).
-
----
-
-### Paso 3: Poner acceso directo y abrir
-Dentro de la carpeta extraída encontrarás un archivo llamado:
-
-🔘 **`Crear_Acceso_Directo.bat`**
-
-Hazle **doble clic**:
-- Creará automáticamente el acceso directo con el icono nítido de alta resolución en tu **Escritorio**.
-- Comprobará que tu ordenador tenga Node.js (si no lo tiene, te lo prepara en 1 clic).
-- Abrirá el programa de inmediato.
-
-> *También puedes hacer doble clic directamente en `Generador_Placas_xTool.exe` en cualquier momento.*
+1. **Descargar**: Haz clic en el botón superior o descarga el archivo [**`Instalador_Placas_xTool_Setup.exe`**](https://github.com/raul-OO8/Placas-Ident/releases/download/v1.2.0/Instalador_Placas_xTool_Setup.exe).
+2. **Instalar**: Haz **doble clic** sobre el archivo descargado y pulsa **«Instalar»**:
+   - Se instala automáticamente como cualquier programa de Windows en tu equipo (`%LocalAppData%\Programs\Placas_xTool`).
+   - Crea el acceso directo con icono nítido de alta resolución en tu **Escritorio** y en el **Menú Inicio**.
+   - Queda registrado en **Configuración de Windows > Aplicaciones instaladas** (con su desinstalador incluido).
+   - Incluye su propio motor autónomo integrado (no requiere que el usuario instale nada adicional).
+   - Se abre de inmediato al terminar.
 
 ---
 

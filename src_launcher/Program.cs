@@ -363,6 +363,10 @@ namespace PlacasXToolDesktop
 
         private static string FindNodeExecutable()
         {
+            string appDir = AppDomain.CurrentDomain.BaseDirectory;
+            string localNode = Path.Combine(appDir, "node.exe");
+            if (File.Exists(localNode)) return localNode;
+
             string[] candidates = new string[]
             {
                 Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "nodejs", "node.exe"),

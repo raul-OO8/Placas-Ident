@@ -3,3 +3,6 @@ data/desktop_window_profile/
 data/*.backup.json
 node_modules/
 _test_*.xcs
+build_stage/
+app_payload.zip
+Instalador_Placas_xTool_Setup.exe
