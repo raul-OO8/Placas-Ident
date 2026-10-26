@@ -253,19 +253,40 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
-    // 2. Comprobar si existe una versión nueva en GitHub (soporta repositorios públicos por HTTPS y privados por Git)
+    // 2. Comprobar si existe una versión nueva en GitHub (soporta GitHub Releases API, HTTPS raw y Git)
     if (pathname === '/api/check-update' && req.method === 'GET') {
       const localInfo = getLocalVersionInfo();
       const repo = localInfo.repo || DEFAULT_GITHUB_REPO;
+      const apiLatestUrl = `https://api.github.com/repos/${repo}/releases/latest`;
       const rawUrl = `https://raw.githubusercontent.com/${repo}/main/version.json?t=${Date.now()}`;
 
       try {
         let remoteInfo = null;
+
+        // Estrategia 1: GitHub Releases API (tiempo real, sin retraso de caché de CDN)
         try {
-          const remoteText = await fetchHttpsText(rawUrl, 3500);
-          remoteInfo = JSON.parse(remoteText);
-        } catch (_) {
-          // Si el repositorio es privado o raw no responde, consultar mediante git fetch + git show origin/main:version.json
+          const apiText = await fetchHttpsText(apiLatestUrl, 3500);
+          const apiJson = JSON.parse(apiText);
+          if (apiJson && apiJson.tag_name) {
+            remoteInfo = {
+              version: String(apiJson.tag_name).replace(/^v/i, '').trim(),
+              releasedAt: (apiJson.published_at || '').slice(0, 10),
+              notes: apiJson.body || '',
+              repo: repo
+            };
+          }
+        } catch (_) {}
+
+        // Estrategia 2: version.json raw de GitHub
+        if (!remoteInfo) {
+          try {
+            const remoteText = await fetchHttpsText(rawUrl, 3500);
+            remoteInfo = JSON.parse(remoteText);
+          } catch (_) {}
+        }
+
+        // Estrategia 3: Git local si existe el repositorio .git
+        if (!remoteInfo && fs.existsSync(path.join(ROOT_DIR, '.git'))) {
           remoteInfo = await new Promise((resolve, reject) => {
             exec('git fetch origin main && git show origin/main:version.json', { cwd: ROOT_DIR, timeout: 6000 }, (err, stdout) => {
               if (err || !stdout) return reject(err || new Error('Sin respuesta de git'));
@@ -276,6 +297,10 @@ const server = http.createServer(async (req, res) => {
               }
             });
           });
+        }
+
+        if (!remoteInfo) {
+          throw new Error('No se pudo obtener información de la versión remota.');
         }
 
         const hasUpdate = compareSemver(remoteInfo.version, localInfo.version) > 0;
