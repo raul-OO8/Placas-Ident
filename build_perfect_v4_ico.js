@@ -175,7 +175,7 @@ const mapBySize = {
 };
 
 const entries = [];
-for (const sz of [16, 20, 24, 32, 40, 48, 64, 128, 256]) {
+for (const sz of [256, 128, 64, 48, 40, 32, 24, 20, 16]) {
   const item = mapBySize[sz];
   const pngBuf = rgbaToPng(sz, sz, item.raw);
   fs.writeFileSync(path.join(ROOT_DIR, `icon_${sz}.png`), pngBuf);
@@ -189,7 +189,7 @@ for (const sz of [16, 20, 24, 32, 40, 48, 64, 128, 256]) {
 }
 
 const icoBuffer = assembleIco(entries);
-for (const name of ['Placas_xTool_Icon_v4.ico', 'Placas_xTool_Icon_v3.ico', 'app-icon.ico']) {
+for (const name of ['Placas_xTool_Icon_v6.ico', 'Placas_xTool_Icon_v5.ico', 'Placas_xTool_Icon_v4.ico', 'Placas_xTool_Icon_v3.ico', 'app-icon.ico']) {
   fs.writeFileSync(path.join(ROOT_DIR, name), icoBuffer);
 }
 

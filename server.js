@@ -136,19 +136,22 @@ function fetchHttpsBuffer(url, timeoutMs = 8000) {
 }
 
 /**
- * Guarda tanto el archivo .SVG como el proyecto nativo .XCS (con parámetros láser y coordenadas X/Y)
+ * Guarda únicamente el proyecto nativo .XCS de xTool Studio (con parámetros láser y coordenadas X/Y)
  * en la subcarpeta de la marca correspondiente: Exportados_xTool/<Marca>/
  */
 function savePlateFilesToExportsFolder({ brand, templateId, xToolX, xToolY, filename, svgContent }) {
   const safeBrand = String(brand || 'General').replace(/[\\/:*?"<>|]+/g, '_').trim() || 'General';
-  const safeFile = path.basename(String(filename || 'placa.svg'));
+  const baseName = path.basename(String(filename || 'placa.xcs')).replace(/\.(svg|xcs)$/i, '');
   const brandFolder = path.join(EXPORTS_DIR, safeBrand);
   if (!fs.existsSync(brandFolder)) fs.mkdirSync(brandFolder, { recursive: true });
 
-  const targetSvgPath = path.join(brandFolder, safeFile);
-  fs.writeFileSync(targetSvgPath, svgContent, 'utf8');
+  // Si existía un .svg antiguo con el mismo nombre en la carpeta, eliminarlo para que solo quede el .xcs
+  const oldSvgPath = path.join(brandFolder, baseName + '.svg');
+  if (fs.existsSync(oldSvgPath)) {
+    try { fs.unlinkSync(oldSvgPath); } catch (_) {}
+  }
 
-  const xcsFilename = safeFile.replace(/\.svg$/i, '') + '.xcs';
+  const xcsFilename = baseName + '.xcs';
   const targetXcsPath = path.join(brandFolder, xcsFilename);
   try {
     const xcsBuffer = buildXToolProjectArchive({
@@ -157,7 +160,7 @@ function savePlateFilesToExportsFolder({ brand, templateId, xToolX, xToolY, file
       templateId: templateId || 'vorma_grande',
       xToolX: xToolX ?? '51',
       xToolY: xToolY ?? '51',
-      projectName: path.basename(targetSvgPath, '.svg')
+      projectName: baseName
     });
     fs.writeFileSync(targetXcsPath, xcsBuffer);
   } catch (err) {
@@ -165,8 +168,8 @@ function savePlateFilesToExportsFolder({ brand, templateId, xToolX, xToolY, file
   }
 
   return {
-    targetPath: targetSvgPath,
-    xcsPath: fs.existsSync(targetXcsPath) ? targetXcsPath : targetSvgPath,
+    targetPath: targetXcsPath,
+    xcsPath: targetXcsPath,
     brandFolder
   };
 }

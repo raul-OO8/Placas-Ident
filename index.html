@@ -4,13 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Placas xTool</title>
-  <link rel="icon" type="image/png" sizes="256x256" href="icon_256.png?v=5" />
-  <link rel="icon" type="image/png" sizes="64x64" href="icon_64.png?v=5" />
-  <link rel="icon" type="image/png" sizes="48x48" href="icon_48.png?v=5" />
-  <link rel="icon" type="image/png" sizes="32x32" href="icon_32.png?v=5" />
-  <link rel="icon" type="image/png" sizes="16x16" href="icon_16.png?v=5" />
-  <link rel="icon" type="image/svg+xml" sizes="any" href="app-icon.svg?v=5" />
-  <link rel="shortcut icon" type="image/x-icon" href="app-icon.ico?v=5" />
+  <link rel="icon" type="image/png" sizes="256x256" href="icon_256.png?v=6" />
+  <link rel="apple-touch-icon" sizes="256x256" href="icon_256.png?v=6" />
   <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
@@ -23,11 +18,16 @@
       <span id="appVersionBadge" class="version-badge" title="Versión instalada">v1.2.0</span>
     </div>
     <div class="header-actions">
-      <button type="button" id="btnUpdateNotice" class="btn btn-update-pill" hidden onclick="window.AppActions.openUpdateModal()">
+      <button type="button" id="btnUpdateNotice" class="btn btn-update-pill" hidden style="display:none;" onclick="window.AppActions.openUpdateModal()">
         ¡Nueva versión disponible!
       </button>
       <button type="button" class="btn btn-primary" onclick="window.AppActions.openNewMachineModal()">+ Nueva máquina</button>
-      <button type="button" class="btn btn-ghost" onclick="window.AppActions.openExportsFolder()" title="Abrir carpeta donde se guardan las placas de esta marca">Carpeta SVG</button>
+      <button type="button" class="btn btn-ghost" onclick="window.AppActions.openExportsFolder()" title="Abrir carpeta donde se guardan las placas de esta marca">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0;">
+          <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+        </svg>
+        <span>Carpeta</span>
+      </button>
       <button type="button" class="btn btn-ghost" onclick="window.AppActions.openCalibrationModal()">Ajustes</button>
     </div>
   </header>

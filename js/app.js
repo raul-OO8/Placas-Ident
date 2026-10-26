@@ -568,7 +568,7 @@ function buildExportFilename(machine, serialNumber, tpl) {
   const modelPart = clean(`${machine.primaryName}_${machine.primaryModel}`);
   const serialPart = serialNumber ? `_SN-${clean(serialNumber)}` : '';
   const coordsPart = `_X${String(tpl.xToolX).replace(',', '.')}_Y${String(tpl.xToolY).replace(',', '.')}`;
-  return `${brandPart}_${modelPart}${serialPart}${coordsPart}.svg`;
+  return `${brandPart}_${modelPart}${serialPart}${coordsPart}.xcs`;
 }
 
 /**
@@ -1520,18 +1520,25 @@ async function checkForUpdates(manual = false) {
 
     AppState.latestUpdateInfo = data;
 
-    if (data.updateAvailable) {
-      const btnNotice = document.getElementById('btnUpdateNotice');
+    const btnNotice = document.getElementById('btnUpdateNotice');
+    if (data.updateAvailable === true) {
       if (btnNotice) {
         btnNotice.hidden = false;
+        btnNotice.style.display = 'inline-flex';
         btnNotice.textContent = `¡Nueva versión v${data.latestVersion}!`;
       }
       openUpdateModal();
-    } else if (manual) {
-      if (data.offline) {
-        showToastNotification('No se pudo conectar con GitHub para comprobar actualizaciones.', 'info');
-      } else {
-        showToastNotification(`Ya tienes instalada la última versión (v${data.currentVersion}).`, 'success');
+    } else {
+      if (btnNotice) {
+        btnNotice.hidden = true;
+        btnNotice.style.display = 'none';
+      }
+      if (manual) {
+        if (data.offline) {
+          showToastNotification('No se pudo conectar con GitHub para comprobar actualizaciones.', 'info');
+        } else {
+          showToastNotification(`Ya tienes instalada la última versión (v${data.currentVersion}).`, 'success');
+        }
       }
     }
   } catch (_) {

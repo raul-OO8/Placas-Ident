@@ -4,6 +4,7 @@ using System.Drawing;
 using System.IO;
 using System.Net.Sockets;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
@@ -13,18 +14,67 @@ using System.Windows.Forms;
 [assembly: AssemblyDescription("Generador de Placas Técnicas para xTool Studio")]
 [assembly: AssemblyCompany("Zybra · Vorma · Olsen & Kael")]
 [assembly: AssemblyProduct("Placas xTool")]
-[assembly: AssemblyVersion("1.2.0.0")]
-[assembly: AssemblyFileVersion("1.2.0.0")]
+[assembly: AssemblyVersion("1.2.1.0")]
+[assembly: AssemblyFileVersion("1.2.1.0")]
 
 namespace PlacasXToolDesktop
 {
     static class Program
     {
         private const int PORT = 3456;
+        private const string APP_USER_MODEL_ID = "PlacasXTool.DesktopApp.v6";
         private static Process serverProcess = null;
 
         [DllImport("shell32.dll", SetLastError = true)]
         private static extern int SetCurrentProcessExplicitAppUserModelID([MarshalAs(UnmanagedType.LPWStr)] string AppID);
+
+        [DllImport("shell32.dll")]
+        private static extern int SHGetPropertyStoreForWindow(IntPtr hwnd, ref Guid iid, [Out, MarshalAs(UnmanagedType.Interface)] out IPropertyStore propertyStore);
+
+        [ComImport, Guid("886D8EEB-8CF2-4446-8D02-CDBA1DBDCF99"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+        private interface IPropertyStore
+        {
+            [MethodImpl(MethodImplOptions.InternalCall, MethodCodeType = MethodCodeType.Runtime)]
+            void GetCount([Out] out uint cProps);
+            [MethodImpl(MethodImplOptions.InternalCall, MethodCodeType = MethodCodeType.Runtime)]
+            void GetAt([In] uint iProp, out PROPERTYKEY pkey);
+            [MethodImpl(MethodImplOptions.InternalCall, MethodCodeType = MethodCodeType.Runtime)]
+            void GetValue([In] ref PROPERTYKEY key, out PROPVARIANT pv);
+            [MethodImpl(MethodImplOptions.InternalCall, MethodCodeType = MethodCodeType.Runtime)]
+            void SetValue([In] ref PROPERTYKEY key, [In] ref PROPVARIANT pv);
+            [MethodImpl(MethodImplOptions.InternalCall, MethodCodeType = MethodCodeType.Runtime)]
+            void Commit();
+        }
+
+        [StructLayout(LayoutKind.Sequential, Pack = 4)]
+        private struct PROPERTYKEY
+        {
+            public Guid fmtid;
+            public uint pid;
+            public PROPERTYKEY(Guid guid, uint id) { fmtid = guid; pid = id; }
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct PROPVARIANT
+        {
+            public ushort vt;
+            public ushort wReserved1;
+            public ushort wReserved2;
+            public ushort wReserved3;
+            public IntPtr pwszVal;
+            public IntPtr padding;
+
+            public static PROPVARIANT FromString(string val)
+            {
+                PROPVARIANT pv = new PROPVARIANT();
+                pv.vt = 31; // VT_LPWSTR
+                pv.pwszVal = Marshal.StringToCoTaskMemUni(val);
+                return pv;
+            }
+        }
+
+        [DllImport("ole32.dll")]
+        private static extern int PropVariantClear(ref PROPVARIANT pvar);
 
         private delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
 
@@ -40,7 +90,12 @@ namespace PlacasXToolDesktop
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
         private static extern IntPtr SendMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
 
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        private static extern IntPtr SetClassLongPtr64(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
+
         private const uint WM_SETICON = 0x0080;
+        private const int GCLP_HICON = -14;
+        private const int GCLP_HICONSM = -34;
         private static readonly IntPtr ICON_SMALL = new IntPtr(0);
         private static readonly IntPtr ICON_BIG = new IntPtr(1);
 
@@ -49,14 +104,22 @@ namespace PlacasXToolDesktop
         {
             try
             {
-                SetCurrentProcessExplicitAppUserModelID("PlacasXTool.DesktopApp.v5");
+                SetCurrentProcessExplicitAppUserModelID(APP_USER_MODEL_ID);
             }
             catch { }
+
+            string appDir = AppDomain.CurrentDomain.BaseDirectory;
+
+            // Modo auxiliar para actualizar en caliente el icono de una ventana ya abierta
+            if (args != null && args.Length > 0 && args[0] == "--apply-icon-now")
+            {
+                ApplyCrispWindowIcon(appDir, 4);
+                return;
+            }
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            string appDir = AppDomain.CurrentDomain.BaseDirectory;
             string serverScript = Path.Combine(appDir, "server.js");
 
             if (!File.Exists(serverScript))
@@ -129,7 +192,7 @@ namespace PlacasXToolDesktop
                 string profileDir = Path.Combine(appDir, "data", "desktop_window_profile");
                 Directory.CreateDirectory(profileDir);
 
-                // Limpiar caché antigua de favicons de 16x16 para que siempre se use el icono de alta resolución
+                // Limpiar caché de favicons para que Chromium use siempre icon_256.png
                 try
                 {
                     string favDb = Path.Combine(profileDir, "Default", "Favicons");
@@ -155,8 +218,7 @@ namespace PlacasXToolDesktop
                     Process uiProc = Process.Start(uiPsi);
                     if (uiProc != null)
                     {
-                        // Aplicar icono nativo multi-resolución (256px + 32px + 16px) a la ventana de la aplicación
-                        ThreadPool.QueueUserWorkItem(_ => ApplyCrispWindowIcon(appDir));
+                        ThreadPool.QueueUserWorkItem(_ => ApplyCrispWindowIcon(appDir, 25));
                         uiProc.WaitForExit();
                     }
                 }
@@ -188,19 +250,44 @@ namespace PlacasXToolDesktop
             }
         }
 
-        private static void ApplyCrispWindowIcon(string appDir)
+        private static void ApplyCrispWindowIcon(string appDir, int maxAttempts)
         {
             try
             {
-                string icoPath = Path.Combine(appDir, "app-icon.ico");
-                if (!File.Exists(icoPath)) return;
+                string png256 = Path.Combine(appDir, "icon_256.png");
+                string png48 = Path.Combine(appDir, "icon_48.png");
+                string icoPath = Path.Combine(appDir, "Placas_xTool_Icon_v6.ico");
+                if (!File.Exists(icoPath)) icoPath = Path.Combine(appDir, "app-icon.ico");
+                string exePath = Path.Combine(appDir, "Generador_Placas_xTool.exe");
 
-                Icon bigIcon = new Icon(icoPath, new Size(256, 256));
-                Icon smallIcon = new Icon(icoPath, SystemInformation.SmallIconSize);
+                IntPtr hIconBig = IntPtr.Zero;
+                IntPtr hIconSmall = IntPtr.Zero;
 
-                for (int attempt = 0; attempt < 25; attempt++)
+                if (File.Exists(png256))
                 {
-                    Thread.Sleep(250);
+                    using (Bitmap bmpBig = new Bitmap(png256))
+                    {
+                        hIconBig = bmpBig.GetHicon();
+                    }
+                }
+                if (File.Exists(png48))
+                {
+                    using (Bitmap bmpSmall = new Bitmap(png48))
+                    {
+                        hIconSmall = bmpSmall.GetHicon();
+                    }
+                }
+
+                Guid iidPropStore = new Guid("886D8EEB-8CF2-4446-8D02-CDBA1DBDCF99");
+                Guid fmtAppUserModel = new Guid("9F4C2855-9F79-4B39-A8D0-E1D42DE1D5F3");
+                PROPERTYKEY pkeyAppId = new PROPERTYKEY(fmtAppUserModel, 5);           // PKEY_AppUserModel_ID
+                PROPERTYKEY pkeyRelaunchCmd = new PROPERTYKEY(fmtAppUserModel, 2);     // PKEY_AppUserModel_RelaunchCommand
+                PROPERTYKEY pkeyRelaunchIcon = new PROPERTYKEY(fmtAppUserModel, 3);    // PKEY_AppUserModel_RelaunchIconResource
+                PROPERTYKEY pkeyRelaunchName = new PROPERTYKEY(fmtAppUserModel, 4);    // PKEY_AppUserModel_RelaunchDisplayNameResource
+
+                for (int attempt = 0; attempt < maxAttempts; attempt++)
+                {
+                    Thread.Sleep(220);
                     bool applied = false;
                     EnumWindows((hWnd, lParam) =>
                     {
@@ -210,14 +297,46 @@ namespace PlacasXToolDesktop
                         string title = sb.ToString();
                         if (title.Contains("Placas xTool"))
                         {
-                            SendMessage(hWnd, WM_SETICON, ICON_BIG, bigIcon.Handle);
-                            SendMessage(hWnd, WM_SETICON, ICON_SMALL, smallIcon.Handle);
+                            // 1. Asignar el recurso .ico vectorial en el PropertyStore de la barra de tareas de Windows 11
+                            try
+                            {
+                                IPropertyStore store;
+                                if (SHGetPropertyStoreForWindow(hWnd, ref iidPropStore, out store) == 0 && store != null)
+                                {
+                                    PROPVARIANT pvId = PROPVARIANT.FromString(APP_USER_MODEL_ID);
+                                    PROPVARIANT pvIcon = PROPVARIANT.FromString(icoPath + ",0");
+                                    PROPVARIANT pvCmd = PROPVARIANT.FromString("\"" + exePath + "\"");
+                                    PROPVARIANT pvName = PROPVARIANT.FromString("Placas xTool");
+
+                                    store.SetValue(ref pkeyAppId, ref pvId);
+                                    store.SetValue(ref pkeyRelaunchIcon, ref pvIcon);
+                                    store.SetValue(ref pkeyRelaunchCmd, ref pvCmd);
+                                    store.SetValue(ref pkeyRelaunchName, ref pvName);
+                                    store.Commit();
+
+                                    PropVariantClear(ref pvId);
+                                    PropVariantClear(ref pvIcon);
+                                    PropVariantClear(ref pvCmd);
+                                    PropVariantClear(ref pvName);
+                                }
+                            }
+                            catch { }
+
+                            // 2. Asignar HICON de 256x256 ARGB directo desde icon_256.png (sin pasar por el decodificador antiguo de System.Drawing.Icon)
+                            if (hIconBig != IntPtr.Zero)
+                            {
+                                SendMessage(hWnd, WM_SETICON, ICON_BIG, hIconBig);
+                            }
+                            if (hIconSmall != IntPtr.Zero)
+                            {
+                                SendMessage(hWnd, WM_SETICON, ICON_SMALL, hIconSmall);
+                            }
                             applied = true;
                         }
                         return true;
                     }, IntPtr.Zero);
 
-                    if (applied && attempt > 4) break;
+                    if (applied && attempt > 5) break;
                 }
             }
             catch { }
