@@ -251,15 +251,31 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
-    // 2. Comprobar si existe una versión nueva en GitHub
+    // 2. Comprobar si existe una versión nueva en GitHub (soporta repositorios públicos por HTTPS y privados por Git)
     if (pathname === '/api/check-update' && req.method === 'GET') {
       const localInfo = getLocalVersionInfo();
       const repo = localInfo.repo || DEFAULT_GITHUB_REPO;
       const rawUrl = `https://raw.githubusercontent.com/${repo}/main/version.json?t=${Date.now()}`;
 
       try {
-        const remoteText = await fetchHttpsText(rawUrl, 4500);
-        const remoteInfo = JSON.parse(remoteText);
+        let remoteInfo = null;
+        try {
+          const remoteText = await fetchHttpsText(rawUrl, 3500);
+          remoteInfo = JSON.parse(remoteText);
+        } catch (_) {
+          // Si el repositorio es privado o raw no responde, consultar mediante git fetch + git show origin/main:version.json
+          remoteInfo = await new Promise((resolve, reject) => {
+            exec('git fetch origin main && git show origin/main:version.json', { cwd: ROOT_DIR, timeout: 6000 }, (err, stdout) => {
+              if (err || !stdout) return reject(err || new Error('Sin respuesta de git'));
+              try {
+                resolve(JSON.parse(stdout));
+              } catch (parseErr) {
+                reject(parseErr);
+              }
+            });
+          });
+        }
+
         const hasUpdate = compareSemver(remoteInfo.version, localInfo.version) > 0;
         res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
         res.end(JSON.stringify({
@@ -298,42 +314,42 @@ const server = http.createServer(async (req, res) => {
       }
 
       try {
-        // Primero obtener el version.json remoto para saber qué archivos actualizar
-        const remoteVerText = await fetchHttpsText(`${rawBase}/version.json?t=${Date.now()}`, 6000);
-        const remoteVer = JSON.parse(remoteVerText);
-        const filesToSync = Array.isArray(remoteVer.files) && remoteVer.files.length > 0
-          ? remoteVer.files
-          : [
-              'version.json',
-              'index.html',
-              'server.js',
-              'app-icon.svg',
-              'app-icon.ico',
-              'css/styles.css',
-              'js/app.js',
-              'js/templates.js',
-              'js/xtool-project.js',
-              'js/initial-data.js'
-            ];
+        let updatedViaGit = false;
+        if (fs.existsSync(path.join(ROOT_DIR, '.git'))) {
+          updatedViaGit = await new Promise((resolve) => {
+            exec('git fetch origin main && git reset --hard origin/main', { cwd: ROOT_DIR, timeout: 10000 }, (err) => {
+              resolve(!err);
+            });
+          });
+        }
 
-        // Intentar git pull primero si existe .git
-        await new Promise((resolve) => {
-          if (fs.existsSync(path.join(ROOT_DIR, '.git'))) {
-            exec('git fetch origin main && git reset --hard origin/main', { cwd: ROOT_DIR }, () => resolve());
-          } else {
-            resolve();
+        if (!updatedViaGit) {
+          const remoteVerText = await fetchHttpsText(`${rawBase}/version.json?t=${Date.now()}`, 6000);
+          const remoteVer = JSON.parse(remoteVerText);
+          const filesToSync = Array.isArray(remoteVer.files) && remoteVer.files.length > 0
+            ? remoteVer.files
+            : [
+                'version.json',
+                'index.html',
+                'server.js',
+                'app-icon.svg',
+                'app-icon.ico',
+                'css/styles.css',
+                'js/app.js',
+                'js/templates.js',
+                'js/xtool-project.js',
+                'js/initial-data.js'
+              ];
+
+          for (const relPath of filesToSync) {
+            const cleanRel = String(relPath).replace(/\\/g, '/').replace(/^\/+/, '');
+            if (cleanRel.startsWith('data/') || cleanRel.startsWith('Exportados_xTool/')) continue;
+            const destPath = path.join(ROOT_DIR, cleanRel);
+            const destDir = path.dirname(destPath);
+            if (!fs.existsSync(destDir)) fs.mkdirSync(destDir, { recursive: true });
+            const fileBuf = await fetchHttpsBuffer(`${rawBase}/${cleanRel}?t=${Date.now()}`, 8000);
+            fs.writeFileSync(destPath, fileBuf);
           }
-        });
-
-        // Además descargar directamente cada archivo listado desde GitHub Raw (funciona incluso sin Git instalado)
-        for (const relPath of filesToSync) {
-          const cleanRel = String(relPath).replace(/\\/g, '/').replace(/^\/+/, '');
-          if (cleanRel.startsWith('data/') || cleanRel.startsWith('Exportados_xTool/')) continue;
-          const destPath = path.join(ROOT_DIR, cleanRel);
-          const destDir = path.dirname(destPath);
-          if (!fs.existsSync(destDir)) fs.mkdirSync(destDir, { recursive: true });
-          const fileBuf = await fetchHttpsBuffer(`${rawBase}/${cleanRel}?t=${Date.now()}`, 8000);
-          fs.writeFileSync(destPath, fileBuf);
         }
 
         // Restaurar la base de datos local del usuario si existía
@@ -342,11 +358,12 @@ const server = http.createServer(async (req, res) => {
           fs.writeFileSync(DB_FILE, machinesBackup, 'utf8');
         }
 
+        const newLocalVer = getLocalVersionInfo();
         res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
         res.end(JSON.stringify({
           ok: true,
-          updatedVersion: remoteVer.version,
-          notes: remoteVer.notes || ''
+          updatedVersion: newLocalVer.version,
+          notes: newLocalVer.notes || ''
         }));
       } catch (err) {
         if (machinesBackup !== null && !fs.existsSync(DB_FILE)) {
