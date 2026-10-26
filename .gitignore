@@ -1,0 +1,5 @@
+# Datos locales de ventana y copias temporales
+data/desktop_window_profile/
+data/*.backup.json
+node_modules/
+_test_*.xcs

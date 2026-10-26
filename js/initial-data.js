@@ -1,0 +1,676 @@
+/**
+ * Catálogo inicial de máquinas precargadas a partir de los archivos del proyecto
+ * (Placas_identificación_diseño.pdf, Vorma/Por hacer.txt y carpetas de modelos existentes)
+ */
+
+const INITIAL_MACHINES = [
+  // =========================================================================
+  // MARCA 1: ZYBRA (Placa Única 150 x 90 mm | xTool X: 50 | Y: 50)
+  // =========================================================================
+  {
+    id: 'zybra-rabe-350',
+    brand: 'zybra',
+    templateId: 'zybra_unica',
+    primaryName: 'Strip Cutter',
+    primaryModel: 'Rabe 350',
+    defaultSerial: '2601-001',
+    defaultDate: '2026',
+    notes: 'Cortadora de tiras Rabe 350 (Diseño base PDF pág. 5)',
+    slots: [
+      { slotId: 'L1', col: 'left', row: 0, label: 'Voltage', value: '380V 50Hz', enabled: true },
+      { slotId: 'L2', col: 'left', row: 1, label: 'Power', value: '1.5 kW', enabled: true },
+      { slotId: 'L3', col: 'left', row: 2, label: 'Date', value: '2026', enabled: true, isDateSlot: true },
+      { slotId: 'R1', col: 'right', row: 0, label: 'Size', value: '720x580x980', enabled: true },
+      { slotId: 'R2', col: 'right', row: 1, label: 'Weight', value: '145 kg', enabled: true }
+    ]
+  },
+  {
+    id: 'zybra-rabe-600',
+    brand: 'zybra',
+    templateId: 'zybra_unica',
+    primaryName: 'Strip Cutter',
+    primaryModel: 'Rabe 600',
+    defaultSerial: '2601-002',
+    defaultDate: '2026',
+    notes: 'Cortadora de tiras Rabe 600',
+    slots: [
+      { slotId: 'L1', col: 'left', row: 0, label: 'Voltage', value: '380V 50Hz', enabled: true },
+      { slotId: 'L2', col: 'left', row: 1, label: 'Power', value: '2.2 kW', enabled: true },
+      { slotId: 'L3', col: 'left', row: 2, label: 'Date', value: '2026', enabled: true, isDateSlot: true },
+      { slotId: 'R1', col: 'right', row: 0, label: 'Size', value: '980x680x1050', enabled: true },
+      { slotId: 'R2', col: 'right', row: 1, label: 'Weight', value: '210 kg', enabled: true }
+    ]
+  },
+  {
+    id: 'zybra-bussard-one',
+    brand: 'zybra',
+    templateId: 'zybra_unica',
+    primaryName: 'Horizontal Slicer',
+    primaryModel: 'Bussard One',
+    defaultSerial: '12213213210',
+    defaultDate: '2026',
+    notes: 'Fileteadora horizontal de 1 carril Bussard One',
+    slots: [
+      { slotId: 'L1', col: 'left', row: 0, label: 'Voltage', value: '380V 50Hz', enabled: true },
+      { slotId: 'L2', col: 'left', row: 1, label: 'Power', value: '2.5 kW', enabled: true },
+      { slotId: 'L3', col: 'left', row: 2, label: 'Date', value: '2026', enabled: true, isDateSlot: true },
+      { slotId: 'R1', col: 'right', row: 0, label: 'Size', value: '1450x750x1180', enabled: true },
+      { slotId: 'R2', col: 'right', row: 1, label: 'Weight', value: '260 kg', enabled: true }
+    ]
+  },
+  {
+    id: 'zybra-bussard-duo',
+    brand: 'zybra',
+    templateId: 'zybra_unica',
+    primaryName: 'Horizontal Slicer',
+    primaryModel: 'Bussard Duo',
+    defaultSerial: '12213213213',
+    defaultDate: '2026',
+    notes: 'Fileteadora horizontal doble carril Bussard Duo',
+    slots: [
+      { slotId: 'L1', col: 'left', row: 0, label: 'Voltage', value: '380V 50Hz', enabled: true },
+      { slotId: 'L2', col: 'left', row: 1, label: 'Power', value: '4.2 kW', enabled: true },
+      { slotId: 'L3', col: 'left', row: 2, label: 'Date', value: '2026', enabled: true, isDateSlot: true },
+      { slotId: 'R1', col: 'right', row: 0, label: 'Size', value: '1650x1100x1220', enabled: true },
+      { slotId: 'R2', col: 'right', row: 1, label: 'Weight', value: '390 kg', enabled: true }
+    ]
+  },
+
+  // =========================================================================
+  // MARCA 2: VORMA — PLACA GRANDE (150 x 90 mm | xTool X: 51 | Y: 51)
+  // =========================================================================
+  {
+    id: 'vorma-grande-bc40',
+    brand: 'vorma',
+    templateId: 'vorma_grande',
+    primaryName: 'Cutter',
+    primaryModel: 'BC40',
+    defaultSerial: '1803-261101',
+    defaultDate: '2026',
+    notes: 'Especificación completa de PDF pág. 2 y Vorma/Por hacer.txt (Series 1803-261101 y 1803-261102)',
+    slots: [
+      { slotId: 'L1', col: 'left', row: 0, label: 'Volt', value: '380V 50HZ', enabled: true },
+      { slotId: 'L2', col: 'left', row: 1, label: 'Fase', value: '3 + T', enabled: true },
+      { slotId: 'L3', col: 'left', row: 2, label: 'Motor', value: '4.1KW', enabled: true },
+      { slotId: 'L4', col: 'left', row: 3, label: 'Weigth', value: '368KG', enabled: true },
+      { slotId: 'R1', col: 'right', row: 0, label: 'Capacity', value: '10-15KG', enabled: true },
+      { slotId: 'R2', col: 'right', row: 1, label: 'Volume', value: '40 L', enabled: true },
+      { slotId: 'R3', col: 'right', row: 2, label: 'Velocity', value: '14 R/M', enabled: true },
+      { slotId: 'R4', col: 'right', row: 3, label: 'Vel blade', value: '1- 1420 2- 2840 rpm', enabled: true }
+    ]
+  },
+  {
+    id: 'vorma-grande-ck200',
+    brand: 'vorma',
+    templateId: 'vorma_grande',
+    primaryName: 'Industrial cooking vessel',
+    primaryModel: 'CK 200',
+    defaultSerial: '1803-261201',
+    defaultDate: '2026',
+    notes: 'Marmita de cocción industrial CK 200',
+    slots: [
+      { slotId: 'L1', col: 'left', row: 0, label: 'Volt', value: '', enabled: true },
+      { slotId: 'L2', col: 'left', row: 1, label: 'Hz', value: '', enabled: true },
+      { slotId: 'L3', col: 'left', row: 2, label: 'Kw', value: '', enabled: true },
+      { slotId: 'L4', col: 'left', row: 3, label: 'Weigth', value: '', enabled: true },
+      { slotId: 'R1', col: 'right', row: 0, label: 'Size', value: '', enabled: true },
+      { slotId: 'R2', col: 'right', row: 1, label: 'Pressure', value: '', enabled: true },
+      { slotId: 'R3', col: 'right', row: 2, label: 'Velocity', value: '', enabled: false },
+      { slotId: 'R4', col: 'right', row: 3, label: 'Vel blade', value: '', enabled: false }
+    ]
+  },
+  {
+    id: 'vorma-grande-ck800',
+    brand: 'vorma',
+    templateId: 'vorma_grande',
+    primaryName: 'Industrial cooking vessel',
+    primaryModel: 'CK 800',
+    defaultSerial: '1803-261202',
+    defaultDate: '2026',
+    notes: 'Marmita de cocción industrial CK 800',
+    slots: [
+      { slotId: 'L1', col: 'left', row: 0, label: 'Volt', value: '', enabled: true },
+      { slotId: 'L2', col: 'left', row: 1, label: 'Hz', value: '', enabled: true },
+      { slotId: 'L3', col: 'left', row: 2, label: 'Kw', value: '', enabled: true },
+      { slotId: 'L4', col: 'left', row: 3, label: 'Weigth', value: '', enabled: true },
+      { slotId: 'R1', col: 'right', row: 0, label: 'Size', value: '', enabled: true },
+      { slotId: 'R2', col: 'right', row: 1, label: 'Pressure', value: '', enabled: true },
+      { slotId: 'R3', col: 'right', row: 2, label: 'Velocity', value: '', enabled: false },
+      { slotId: 'R4', col: 'right', row: 3, label: 'Vel blade', value: '', enabled: false }
+    ]
+  },
+  {
+    id: 'vorma-grande-ckt400',
+    brand: 'vorma',
+    templateId: 'vorma_grande',
+    primaryName: 'Automatic Tilting Kettles',
+    primaryModel: 'CK-t 400',
+    defaultSerial: '1803-261203',
+    defaultDate: '2026',
+    notes: 'Marmita volcable automática CK-t 400',
+    slots: [
+      { slotId: 'L1', col: 'left', row: 0, label: 'Volt', value: '', enabled: true },
+      { slotId: 'L2', col: 'left', row: 1, label: 'Hz', value: '', enabled: true },
+      { slotId: 'L3', col: 'left', row: 2, label: 'Kw', value: '', enabled: true },
+      { slotId: 'L4', col: 'left', row: 3, label: 'Weigth', value: '', enabled: true },
+      { slotId: 'R1', col: 'right', row: 0, label: 'Size', value: '', enabled: true },
+      { slotId: 'R2', col: 'right', row: 1, label: 'Pressure', value: '', enabled: true },
+      { slotId: 'R3', col: 'right', row: 2, label: 'Velocity', value: '', enabled: false },
+      { slotId: 'R4', col: 'right', row: 3, label: 'Vel blade', value: '', enabled: false }
+    ]
+  },
+  {
+    id: 'vorma-grande-ckt600',
+    brand: 'vorma',
+    templateId: 'vorma_grande',
+    primaryName: 'Automatic Tilting Kettles',
+    primaryModel: 'CK-t 600',
+    defaultSerial: '1803-261204',
+    defaultDate: '2026',
+    notes: 'Marmita volcable automática CK-t 600',
+    slots: [
+      { slotId: 'L1', col: 'left', row: 0, label: 'Volt', value: '', enabled: true },
+      { slotId: 'L2', col: 'left', row: 1, label: 'Hz', value: '', enabled: true },
+      { slotId: 'L3', col: 'left', row: 2, label: 'Kw', value: '', enabled: true },
+      { slotId: 'L4', col: 'left', row: 3, label: 'Weigth', value: '', enabled: true },
+      { slotId: 'R1', col: 'right', row: 0, label: 'Size', value: '', enabled: true },
+      { slotId: 'R2', col: 'right', row: 1, label: 'Pressure', value: '', enabled: true },
+      { slotId: 'R3', col: 'right', row: 2, label: 'Velocity', value: '', enabled: false },
+      { slotId: 'R4', col: 'right', row: 3, label: 'Vel blade', value: '', enabled: false }
+    ]
+  },
+  {
+    id: 'vorma-grande-fs',
+    brand: 'vorma',
+    templateId: 'vorma_grande',
+    primaryName: 'Hamburger Forming Machine',
+    primaryModel: 'FS',
+    defaultSerial: '1803-261205',
+    defaultDate: '2026',
+    notes: 'Formadora de hamburguesas FS',
+    slots: [
+      { slotId: 'L1', col: 'left', row: 0, label: 'Volt', value: '', enabled: true },
+      { slotId: 'L2', col: 'left', row: 1, label: 'Hz', value: '', enabled: true },
+      { slotId: 'L3', col: 'left', row: 2, label: 'Kw', value: '', enabled: true },
+      { slotId: 'L4', col: 'left', row: 3, label: 'Weigth', value: '', enabled: true },
+      { slotId: 'R1', col: 'right', row: 0, label: 'Size', value: '', enabled: true },
+      { slotId: 'R2', col: 'right', row: 1, label: 'Pressure', value: '', enabled: true },
+      { slotId: 'R3', col: 'right', row: 2, label: 'Velocity', value: '', enabled: false },
+      { slotId: 'R4', col: 'right', row: 3, label: 'Vel blade', value: '', enabled: false }
+    ]
+  },
+  {
+    id: 'vorma-grande-pt300',
+    brand: 'vorma',
+    templateId: 'vorma_grande',
+    primaryName: 'Tilting Braising Pan & Mixer',
+    primaryModel: 'PT 300',
+    defaultSerial: '1803-261206',
+    defaultDate: '2026',
+    notes: 'Sartén basculante con mezclador PT 300',
+    slots: [
+      { slotId: 'L1', col: 'left', row: 0, label: 'Volt', value: '', enabled: true },
+      { slotId: 'L2', col: 'left', row: 1, label: 'Hz', value: '', enabled: true },
+      { slotId: 'L3', col: 'left', row: 2, label: 'Kw', value: '', enabled: true },
+      { slotId: 'L4', col: 'left', row: 3, label: 'Weigth', value: '', enabled: true },
+      { slotId: 'R1', col: 'right', row: 0, label: 'Size', value: '', enabled: true },
+      { slotId: 'R2', col: 'right', row: 1, label: 'Pressure', value: '', enabled: true },
+      { slotId: 'R3', col: 'right', row: 2, label: 'Velocity', value: '', enabled: false },
+      { slotId: 'R4', col: 'right', row: 3, label: 'Vel blade', value: '', enabled: false }
+    ]
+  },
+
+  // =========================================================================
+  // MARCA 2: VORMA — PLACA PEQUEÑA (110 x 70 mm | xTool X: 50,5 | Y: 50)
+  // =========================================================================
+  {
+    id: 'vorma-pequena-bc40',
+    brand: 'vorma',
+    templateId: 'vorma_pequena',
+    primaryName: 'Bowl cutter',
+    primaryModel: 'BC 40',
+    defaultSerial: '1803-261101',
+    defaultDate: '2026',
+    notes: 'Bowl cutter BC 40 en formato Placa Pequeña (110x70 mm)',
+    slots: [
+      { slotId: 'L1', col: 'left', row: 0, label: 'Volt', value: '380V 50HZ', enabled: true },
+      { slotId: 'L2', col: 'left', row: 1, label: 'Fase', value: '3 + T', enabled: true },
+      { slotId: 'L3', col: 'left', row: 2, label: 'Motor', value: '4.1KW', enabled: true },
+      { slotId: 'L4', col: 'left', row: 3, label: 'Weigth', value: '368KG', enabled: true },
+      { slotId: 'R1', col: 'right', row: 0, label: 'Capacity', value: '10-15KG', enabled: true },
+      { slotId: 'R2', col: 'right', row: 1, label: 'Volume', value: '40 L', enabled: true },
+      { slotId: 'R3', col: 'right', row: 2, label: 'Velocity', value: '14 R/M', enabled: true },
+      { slotId: 'R4', col: 'right', row: 3, label: 'Vel blade', value: '1- 1420 2- 2840 rpm', enabled: true }
+    ]
+  },
+  {
+    id: 'vorma-pequena-bc15',
+    brand: 'vorma',
+    templateId: 'vorma_pequena',
+    primaryName: 'Bowl cutter',
+    primaryModel: 'BC 15',
+    defaultSerial: '1803-261015',
+    defaultDate: '2026',
+    notes: 'Bowl cutter BC 15 en Placa Pequeña (110x70 mm)',
+    slots: [
+      { slotId: 'L1', col: 'left', row: 0, label: 'Volt', value: '', enabled: true },
+      { slotId: 'L2', col: 'left', row: 1, label: 'Hz', value: '', enabled: true },
+      { slotId: 'L3', col: 'left', row: 2, label: 'Kw', value: '', enabled: true },
+      { slotId: 'L4', col: 'left', row: 3, label: 'Weigth', value: '', enabled: true },
+      { slotId: 'R1', col: 'right', row: 0, label: 'Capacity', value: '', enabled: false },
+      { slotId: 'R2', col: 'right', row: 1, label: 'Volume', value: '', enabled: false },
+      { slotId: 'R3', col: 'right', row: 2, label: 'Size', value: '', enabled: true },
+      { slotId: 'R4', col: 'right', row: 3, label: 'Pressure', value: '', enabled: true }
+    ]
+  },
+  {
+    id: 'vorma-pequena-bc25',
+    brand: 'vorma',
+    templateId: 'vorma_pequena',
+    primaryName: 'Bowl cutter',
+    primaryModel: 'BC 25',
+    defaultSerial: '1803-261025',
+    defaultDate: '2026',
+    notes: 'Bowl cutter BC 25 en Placa Pequeña (110x70 mm)',
+    slots: [
+      { slotId: 'L1', col: 'left', row: 0, label: 'Volt', value: '', enabled: true },
+      { slotId: 'L2', col: 'left', row: 1, label: 'Hz', value: '', enabled: true },
+      { slotId: 'L3', col: 'left', row: 2, label: 'Kw', value: '', enabled: true },
+      { slotId: 'L4', col: 'left', row: 3, label: 'Weigth', value: '', enabled: true },
+      { slotId: 'R1', col: 'right', row: 0, label: 'Capacity', value: '', enabled: false },
+      { slotId: 'R2', col: 'right', row: 1, label: 'Volume', value: '', enabled: false },
+      { slotId: 'R3', col: 'right', row: 2, label: 'Size', value: '', enabled: true },
+      { slotId: 'R4', col: 'right', row: 3, label: 'Pressure', value: '', enabled: true }
+    ]
+  },
+
+  // =========================================================================
+  // MARCA 3: OLSEN & KAEL — PLACA GRANDE (150 x 90 mm | xTool X: 48 | Y: 49,5)
+  // =========================================================================
+  {
+    id: 'olsen-grande-herkules-600',
+    brand: 'olsen',
+    templateId: 'olsen_grande',
+    primaryName: 'Herkules',
+    primaryModel: '600',
+    defaultSerial: 'OK-2601',
+    defaultDate: '2026',
+    notes: 'Modelo Herkules 600 (Diseño base PDF pág. 1)',
+    slots: [
+      { slotId: 'L1', col: 'left', row: 0, label: 'Voltage', value: '380V 50Hz', enabled: true },
+      { slotId: 'L2', col: 'left', row: 1, label: 'Size', value: '1200x850x1100', enabled: true },
+      { slotId: 'L3', col: 'left', row: 2, label: 'Weight', value: '420 kg', enabled: true },
+      { slotId: 'L4', col: 'left', row: 3, label: 'Fase', value: '', enabled: false },
+      { slotId: 'R1', col: 'right', row: 0, label: 'Power', value: '5.5 kW', enabled: true },
+      { slotId: 'R2', col: 'right', row: 1, label: 'Pressure', value: '6 bar', enabled: true },
+      { slotId: 'R3', col: 'right', row: 2, label: 'Capacity', value: '', enabled: false },
+      { slotId: 'R4', col: 'right', row: 3, label: 'Velocity', value: '', enabled: false }
+    ]
+  },
+  {
+    id: 'olsen-grande-acheron-500',
+    brand: 'olsen',
+    templateId: 'olsen_grande',
+    primaryName: 'ACHERON',
+    primaryModel: '500',
+    defaultSerial: 'OK-2602',
+    defaultDate: '2026',
+    notes: 'Modelo ACHERON 500',
+    slots: [
+      { slotId: 'L1', col: 'left', row: 0, label: 'Voltage', value: '', enabled: true },
+      { slotId: 'L2', col: 'left', row: 1, label: 'Size', value: '', enabled: true },
+      { slotId: 'L3', col: 'left', row: 2, label: 'Weight', value: '', enabled: true },
+      { slotId: 'L4', col: 'left', row: 3, label: 'Fase', value: '', enabled: false },
+      { slotId: 'R1', col: 'right', row: 0, label: 'Power', value: '', enabled: true },
+      { slotId: 'R2', col: 'right', row: 1, label: 'Pressure', value: '', enabled: true },
+      { slotId: 'R3', col: 'right', row: 2, label: 'Capacity', value: '', enabled: false },
+      { slotId: 'R4', col: 'right', row: 3, label: 'Velocity', value: '', enabled: false }
+    ]
+  },
+  {
+    id: 'olsen-grande-elytra-900',
+    brand: 'olsen',
+    templateId: 'olsen_grande',
+    primaryName: 'Elytra',
+    primaryModel: '900',
+    defaultSerial: 'OK-2603',
+    defaultDate: '2026',
+    notes: 'Modelo Elytra 900',
+    slots: [
+      { slotId: 'L1', col: 'left', row: 0, label: 'Voltage', value: '', enabled: true },
+      { slotId: 'L2', col: 'left', row: 1, label: 'Size', value: '', enabled: true },
+      { slotId: 'L3', col: 'left', row: 2, label: 'Weight', value: '', enabled: true },
+      { slotId: 'L4', col: 'left', row: 3, label: 'Fase', value: '', enabled: false },
+      { slotId: 'R1', col: 'right', row: 0, label: 'Power', value: '', enabled: true },
+      { slotId: 'R2', col: 'right', row: 1, label: 'Pressure', value: '', enabled: true },
+      { slotId: 'R3', col: 'right', row: 2, label: 'Capacity', value: '', enabled: false },
+      { slotId: 'R4', col: 'right', row: 3, label: 'Velocity', value: '', enabled: false }
+    ]
+  },
+  {
+    id: 'olsen-grande-mantis-600',
+    brand: 'olsen',
+    templateId: 'olsen_grande',
+    primaryName: 'Mantis',
+    primaryModel: '600',
+    defaultSerial: 'OK-2604',
+    defaultDate: '2026',
+    notes: 'Modelo Mantis 600',
+    slots: [
+      { slotId: 'L1', col: 'left', row: 0, label: 'Voltage', value: '', enabled: true },
+      { slotId: 'L2', col: 'left', row: 1, label: 'Size', value: '', enabled: true },
+      { slotId: 'L3', col: 'left', row: 2, label: 'Weight', value: '', enabled: true },
+      { slotId: 'L4', col: 'left', row: 3, label: 'Fase', value: '', enabled: false },
+      { slotId: 'R1', col: 'right', row: 0, label: 'Power', value: '', enabled: true },
+      { slotId: 'R2', col: 'right', row: 1, label: 'Pressure', value: '', enabled: true },
+      { slotId: 'R3', col: 'right', row: 2, label: 'Capacity', value: '', enabled: false },
+      { slotId: 'R4', col: 'right', row: 3, label: 'Velocity', value: '', enabled: false }
+    ]
+  },
+  {
+    id: 'olsen-grande-neska-duo-500',
+    brand: 'olsen',
+    templateId: 'olsen_grande',
+    primaryName: 'NESKA',
+    primaryModel: 'DUO 500',
+    defaultSerial: 'OK-2605',
+    defaultDate: '2026',
+    notes: 'Modelo NESKA DUO 500',
+    slots: [
+      { slotId: 'L1', col: 'left', row: 0, label: 'Voltage', value: '', enabled: true },
+      { slotId: 'L2', col: 'left', row: 1, label: 'Size', value: '', enabled: true },
+      { slotId: 'L3', col: 'left', row: 2, label: 'Weight', value: '', enabled: true },
+      { slotId: 'L4', col: 'left', row: 3, label: 'Fase', value: '', enabled: false },
+      { slotId: 'R1', col: 'right', row: 0, label: 'Power', value: '', enabled: true },
+      { slotId: 'R2', col: 'right', row: 1, label: 'Pressure', value: '', enabled: true },
+      { slotId: 'R3', col: 'right', row: 2, label: 'Capacity', value: '', enabled: false },
+      { slotId: 'R4', col: 'right', row: 3, label: 'Velocity', value: '', enabled: false }
+    ]
+  },
+  {
+    id: 'olsen-grande-neska-duo-700',
+    brand: 'olsen',
+    templateId: 'olsen_grande',
+    primaryName: 'NESKA',
+    primaryModel: 'DUO 700',
+    defaultSerial: 'OK-2606',
+    defaultDate: '2026',
+    notes: 'Modelo NESKA DUO 700',
+    slots: [
+      { slotId: 'L1', col: 'left', row: 0, label: 'Voltage', value: '', enabled: true },
+      { slotId: 'L2', col: 'left', row: 1, label: 'Size', value: '', enabled: true },
+      { slotId: 'L3', col: 'left', row: 2, label: 'Weight', value: '', enabled: true },
+      { slotId: 'L4', col: 'left', row: 3, label: 'Fase', value: '', enabled: false },
+      { slotId: 'R1', col: 'right', row: 0, label: 'Power', value: '', enabled: true },
+      { slotId: 'R2', col: 'right', row: 1, label: 'Pressure', value: '', enabled: true },
+      { slotId: 'R3', col: 'right', row: 2, label: 'Capacity', value: '', enabled: false },
+      { slotId: 'R4', col: 'right', row: 3, label: 'Velocity', value: '', enabled: false }
+    ]
+  },
+  {
+    id: 'olsen-grande-neska-duo-auto',
+    brand: 'olsen',
+    templateId: 'olsen_grande',
+    primaryName: 'NESKA',
+    primaryModel: 'DUO AUTO',
+    defaultSerial: 'OK-2607',
+    defaultDate: '2026',
+    notes: 'Modelo NESKA DUO AUTO',
+    slots: [
+      { slotId: 'L1', col: 'left', row: 0, label: 'Voltage', value: '', enabled: true },
+      { slotId: 'L2', col: 'left', row: 1, label: 'Size', value: '', enabled: true },
+      { slotId: 'L3', col: 'left', row: 2, label: 'Weight', value: '', enabled: true },
+      { slotId: 'L4', col: 'left', row: 3, label: 'Fase', value: '', enabled: false },
+      { slotId: 'R1', col: 'right', row: 0, label: 'Power', value: '', enabled: true },
+      { slotId: 'R2', col: 'right', row: 1, label: 'Pressure', value: '', enabled: true },
+      { slotId: 'R3', col: 'right', row: 2, label: 'Capacity', value: '', enabled: false },
+      { slotId: 'R4', col: 'right', row: 3, label: 'Velocity', value: '', enabled: false }
+    ]
+  },
+  {
+    id: 'olsen-grande-vesta-300',
+    brand: 'olsen',
+    templateId: 'olsen_grande',
+    primaryName: 'VESTA',
+    primaryModel: '300',
+    defaultSerial: 'OK-2608',
+    defaultDate: '2026',
+    notes: 'Modelo VESTA 300',
+    slots: [
+      { slotId: 'L1', col: 'left', row: 0, label: 'Voltage', value: '', enabled: true },
+      { slotId: 'L2', col: 'left', row: 1, label: 'Size', value: '', enabled: true },
+      { slotId: 'L3', col: 'left', row: 2, label: 'Weight', value: '', enabled: true },
+      { slotId: 'L4', col: 'left', row: 3, label: 'Fase', value: '', enabled: false },
+      { slotId: 'R1', col: 'right', row: 0, label: 'Power', value: '', enabled: true },
+      { slotId: 'R2', col: 'right', row: 1, label: 'Pressure', value: '', enabled: true },
+      { slotId: 'R3', col: 'right', row: 2, label: 'Capacity', value: '', enabled: false },
+      { slotId: 'R4', col: 'right', row: 3, label: 'Velocity', value: '', enabled: false }
+    ]
+  },
+  {
+    id: 'olsen-grande-vesta-400',
+    brand: 'olsen',
+    templateId: 'olsen_grande',
+    primaryName: 'VESTA',
+    primaryModel: '400',
+    defaultSerial: 'OK-2609',
+    defaultDate: '2026',
+    notes: 'Modelo VESTA 400',
+    slots: [
+      { slotId: 'L1', col: 'left', row: 0, label: 'Voltage', value: '', enabled: true },
+      { slotId: 'L2', col: 'left', row: 1, label: 'Size', value: '', enabled: true },
+      { slotId: 'L3', col: 'left', row: 2, label: 'Weight', value: '', enabled: true },
+      { slotId: 'L4', col: 'left', row: 3, label: 'Fase', value: '', enabled: false },
+      { slotId: 'R1', col: 'right', row: 0, label: 'Power', value: '', enabled: true },
+      { slotId: 'R2', col: 'right', row: 1, label: 'Pressure', value: '', enabled: true },
+      { slotId: 'R3', col: 'right', row: 2, label: 'Capacity', value: '', enabled: false },
+      { slotId: 'R4', col: 'right', row: 3, label: 'Velocity', value: '', enabled: false }
+    ]
+  },
+  {
+    id: 'olsen-grande-vesta-compact',
+    brand: 'olsen',
+    templateId: 'olsen_grande',
+    primaryName: 'VESTA',
+    primaryModel: 'COMPACT',
+    defaultSerial: 'OK-2610',
+    defaultDate: '2026',
+    notes: 'Modelo VESTA COMPACT',
+    slots: [
+      { slotId: 'L1', col: 'left', row: 0, label: 'Voltage', value: '', enabled: true },
+      { slotId: 'L2', col: 'left', row: 1, label: 'Size', value: '', enabled: true },
+      { slotId: 'L3', col: 'left', row: 2, label: 'Weight', value: '', enabled: true },
+      { slotId: 'L4', col: 'left', row: 3, label: 'Fase', value: '', enabled: false },
+      { slotId: 'R1', col: 'right', row: 0, label: 'Power', value: '', enabled: true },
+      { slotId: 'R2', col: 'right', row: 1, label: 'Pressure', value: '', enabled: true },
+      { slotId: 'R3', col: 'right', row: 2, label: 'Capacity', value: '', enabled: false },
+      { slotId: 'R4', col: 'right', row: 3, label: 'Velocity', value: '', enabled: false }
+    ]
+  },
+  {
+    id: 'olsen-grande-vesta-rotate',
+    brand: 'olsen',
+    templateId: 'olsen_grande',
+    primaryName: 'VESTA',
+    primaryModel: 'ROTATE',
+    defaultSerial: 'OK-2611',
+    defaultDate: '2026',
+    notes: 'Modelo VESTA ROTATE',
+    slots: [
+      { slotId: 'L1', col: 'left', row: 0, label: 'Voltage', value: '', enabled: true },
+      { slotId: 'L2', col: 'left', row: 1, label: 'Size', value: '', enabled: true },
+      { slotId: 'L3', col: 'left', row: 2, label: 'Weight', value: '', enabled: true },
+      { slotId: 'L4', col: 'left', row: 3, label: 'Fase', value: '', enabled: false },
+      { slotId: 'R1', col: 'right', row: 0, label: 'Power', value: '', enabled: true },
+      { slotId: 'R2', col: 'right', row: 1, label: 'Pressure', value: '', enabled: true },
+      { slotId: 'R3', col: 'right', row: 2, label: 'Capacity', value: '', enabled: false },
+      { slotId: 'R4', col: 'right', row: 3, label: 'Velocity', value: '', enabled: false }
+    ]
+  },
+
+  // =========================================================================
+  // MARCA 3: OLSEN & KAEL — PLACA PEQUEÑA (110 x 70 mm | xTool X: 47 | Y: 47,5)
+  // =========================================================================
+  {
+    id: 'olsen-pequena-axion-serie-5',
+    brand: 'olsen',
+    templateId: 'olsen_pequena',
+    primaryName: 'AXION',
+    primaryModel: 'SERIE 5',
+    defaultSerial: 'OK-S5-001',
+    defaultDate: '2026',
+    notes: 'Modelo AXION SERIE 5 (Diseño base PDF pág. 4)',
+    slots: [
+      { slotId: 'L1', col: 'left', row: 0, label: 'Voltage', value: '230V 50Hz', enabled: true },
+      { slotId: 'L2', col: 'left', row: 1, label: 'Size', value: '650x480x720', enabled: true },
+      { slotId: 'L3', col: 'left', row: 2, label: 'Weight', value: '95 kg', enabled: true },
+      { slotId: 'L4', col: 'left', row: 3, label: 'Fase', value: '', enabled: false },
+      { slotId: 'R1', col: 'right', row: 0, label: 'Power', value: '1.8 kW', enabled: true },
+      { slotId: 'R2', col: 'right', row: 1, label: 'Pressure', value: '6 bar', enabled: true },
+      { slotId: 'R3', col: 'right', row: 2, label: 'Capacity', value: '', enabled: false },
+      { slotId: 'R4', col: 'right', row: 3, label: 'Velocity', value: '', enabled: false }
+    ]
+  },
+  {
+    id: 'olsen-pequena-axion-compact-s5',
+    brand: 'olsen',
+    templateId: 'olsen_pequena',
+    primaryName: 'AXION',
+    primaryModel: 'COMPACT S5',
+    defaultSerial: 'OK-S5-002',
+    defaultDate: '2026',
+    notes: 'Modelo AXION COMPACT S5',
+    slots: [
+      { slotId: 'L1', col: 'left', row: 0, label: 'Voltage', value: '', enabled: true },
+      { slotId: 'L2', col: 'left', row: 1, label: 'Size', value: '', enabled: true },
+      { slotId: 'L3', col: 'left', row: 2, label: 'Weight', value: '', enabled: true },
+      { slotId: 'L4', col: 'left', row: 3, label: 'Fase', value: '', enabled: false },
+      { slotId: 'R1', col: 'right', row: 0, label: 'Power', value: '', enabled: true },
+      { slotId: 'R2', col: 'right', row: 1, label: 'Pressure', value: '', enabled: true },
+      { slotId: 'R3', col: 'right', row: 2, label: 'Capacity', value: '', enabled: false },
+      { slotId: 'R4', col: 'right', row: 3, label: 'Velocity', value: '', enabled: false }
+    ]
+  },
+  {
+    id: 'olsen-pequena-neska-400',
+    brand: 'olsen',
+    templateId: 'olsen_pequena',
+    primaryName: 'NESKA',
+    primaryModel: '400',
+    defaultSerial: 'OK-N400-01',
+    defaultDate: '2026',
+    notes: 'Modelo NESKA 400 (Placa Pequeña)',
+    slots: [
+      { slotId: 'L1', col: 'left', row: 0, label: 'Voltage', value: '', enabled: true },
+      { slotId: 'L2', col: 'left', row: 1, label: 'Size', value: '', enabled: true },
+      { slotId: 'L3', col: 'left', row: 2, label: 'Weight', value: '', enabled: true },
+      { slotId: 'L4', col: 'left', row: 3, label: 'Fase', value: '', enabled: false },
+      { slotId: 'R1', col: 'right', row: 0, label: 'Power', value: '', enabled: true },
+      { slotId: 'R2', col: 'right', row: 1, label: 'Pressure', value: '', enabled: true },
+      { slotId: 'R3', col: 'right', row: 2, label: 'Capacity', value: '', enabled: false },
+      { slotId: 'R4', col: 'right', row: 3, label: 'Velocity', value: '', enabled: false }
+    ]
+  },
+  {
+    id: 'olsen-pequena-neska-500',
+    brand: 'olsen',
+    templateId: 'olsen_pequena',
+    primaryName: 'NESKA',
+    primaryModel: '500',
+    defaultSerial: 'OK-N500-01',
+    defaultDate: '2026',
+    notes: 'Modelo NESKA 500 (Placa Pequeña)',
+    slots: [
+      { slotId: 'L1', col: 'left', row: 0, label: 'Voltage', value: '', enabled: true },
+      { slotId: 'L2', col: 'left', row: 1, label: 'Size', value: '', enabled: true },
+      { slotId: 'L3', col: 'left', row: 2, label: 'Weight', value: '', enabled: true },
+      { slotId: 'L4', col: 'left', row: 3, label: 'Fase', value: '', enabled: false },
+      { slotId: 'R1', col: 'right', row: 0, label: 'Power', value: '', enabled: true },
+      { slotId: 'R2', col: 'right', row: 1, label: 'Pressure', value: '', enabled: true },
+      { slotId: 'R3', col: 'right', row: 2, label: 'Capacity', value: '', enabled: false },
+      { slotId: 'R4', col: 'right', row: 3, label: 'Velocity', value: '', enabled: false }
+    ]
+  },
+  {
+    id: 'olsen-pequena-neska-600',
+    brand: 'olsen',
+    templateId: 'olsen_pequena',
+    primaryName: 'NESKA',
+    primaryModel: '600',
+    defaultSerial: 'OK-N600-01',
+    defaultDate: '2026',
+    notes: 'Modelo NESKA 600 (Placa Pequeña)',
+    slots: [
+      { slotId: 'L1', col: 'left', row: 0, label: 'Voltage', value: '', enabled: true },
+      { slotId: 'L2', col: 'left', row: 1, label: 'Size', value: '', enabled: true },
+      { slotId: 'L3', col: 'left', row: 2, label: 'Weight', value: '', enabled: true },
+      { slotId: 'L4', col: 'left', row: 3, label: 'Fase', value: '', enabled: false },
+      { slotId: 'R1', col: 'right', row: 0, label: 'Power', value: '', enabled: true },
+      { slotId: 'R2', col: 'right', row: 1, label: 'Pressure', value: '', enabled: true },
+      { slotId: 'R3', col: 'right', row: 2, label: 'Capacity', value: '', enabled: false },
+      { slotId: 'R4', col: 'right', row: 3, label: 'Velocity', value: '', enabled: false }
+    ]
+  },
+  {
+    id: 'olsen-pequena-neska-1000',
+    brand: 'olsen',
+    templateId: 'olsen_pequena',
+    primaryName: 'NESKA',
+    primaryModel: '1000',
+    defaultSerial: 'OK-N1000-01',
+    defaultDate: '2026',
+    notes: 'Modelo NESKA 1000 (Placa Pequeña)',
+    slots: [
+      { slotId: 'L1', col: 'left', row: 0, label: 'Voltage', value: '', enabled: true },
+      { slotId: 'L2', col: 'left', row: 1, label: 'Size', value: '', enabled: true },
+      { slotId: 'L3', col: 'left', row: 2, label: 'Weight', value: '', enabled: true },
+      { slotId: 'L4', col: 'left', row: 3, label: 'Fase', value: '', enabled: false },
+      { slotId: 'R1', col: 'right', row: 0, label: 'Power', value: '', enabled: true },
+      { slotId: 'R2', col: 'right', row: 1, label: 'Pressure', value: '', enabled: true },
+      { slotId: 'R3', col: 'right', row: 2, label: 'Capacity', value: '', enabled: false },
+      { slotId: 'R4', col: 'right', row: 3, label: 'Velocity', value: '', enabled: false }
+    ]
+  },
+  {
+    id: 'olsen-pequena-neska-compact-500',
+    brand: 'olsen',
+    templateId: 'olsen_pequena',
+    primaryName: 'NESKA',
+    primaryModel: 'COMPACT 500',
+    defaultSerial: 'OK-NC500-01',
+    defaultDate: '2026',
+    notes: 'Modelo NESKA COMPACT 500 (Placa Pequeña)',
+    slots: [
+      { slotId: 'L1', col: 'left', row: 0, label: 'Voltage', value: '', enabled: true },
+      { slotId: 'L2', col: 'left', row: 1, label: 'Size', value: '', enabled: true },
+      { slotId: 'L3', col: 'left', row: 2, label: 'Weight', value: '', enabled: true },
+      { slotId: 'L4', col: 'left', row: 3, label: 'Fase', value: '', enabled: false },
+      { slotId: 'R1', col: 'right', row: 0, label: 'Power', value: '', enabled: true },
+      { slotId: 'R2', col: 'right', row: 1, label: 'Pressure', value: '', enabled: true },
+      { slotId: 'R3', col: 'right', row: 2, label: 'Capacity', value: '', enabled: false },
+      { slotId: 'R4', col: 'right', row: 3, label: 'Velocity', value: '', enabled: false }
+    ]
+  },
+  {
+    id: 'olsen-pequena-neska-compact-1000',
+    brand: 'olsen',
+    templateId: 'olsen_pequena',
+    primaryName: 'NESKA',
+    primaryModel: 'COMPACT 1000',
+    defaultSerial: 'OK-NC1000-01',
+    defaultDate: '2026',
+    notes: 'Modelo NESKA COMPACT 1000 (Placa Pequeña)',
+    slots: [
+      { slotId: 'L1', col: 'left', row: 0, label: 'Voltage', value: '', enabled: true },
+      { slotId: 'L2', col: 'left', row: 1, label: 'Size', value: '', enabled: true },
+      { slotId: 'L3', col: 'left', row: 2, label: 'Weight', value: '', enabled: true },
+      { slotId: 'L4', col: 'left', row: 3, label: 'Fase', value: '', enabled: false },
+      { slotId: 'R1', col: 'right', row: 0, label: 'Power', value: '', enabled: true },
+      { slotId: 'R2', col: 'right', row: 1, label: 'Pressure', value: '', enabled: true },
+      { slotId: 'R3', col: 'right', row: 2, label: 'Capacity', value: '', enabled: false },
+      { slotId: 'R4', col: 'right', row: 3, label: 'Velocity', value: '', enabled: false }
+    ]
+  }
+];
+
+window.INITIAL_MACHINES = INITIAL_MACHINES;

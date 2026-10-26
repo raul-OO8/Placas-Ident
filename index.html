@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Placas xTool</title>
+  <link rel="icon" type="image/png" sizes="256x256" href="icon_256.png?v=5" />
+  <link rel="icon" type="image/png" sizes="64x64" href="icon_64.png?v=5" />
+  <link rel="icon" type="image/png" sizes="48x48" href="icon_48.png?v=5" />
+  <link rel="icon" type="image/png" sizes="32x32" href="icon_32.png?v=5" />
+  <link rel="icon" type="image/png" sizes="16x16" href="icon_16.png?v=5" />
+  <link rel="icon" type="image/svg+xml" sizes="any" href="app-icon.svg?v=5" />
+  <link rel="shortcut icon" type="image/x-icon" href="app-icon.ico?v=5" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+  <!-- CABECERA -->
+  <header class="app-header">
+    <div class="header-brand">
+      <img src="app-icon.svg" alt="" class="header-logo" width="34" height="34" />
+      <h1>Placas xTool</h1>
+      <span id="appVersionBadge" class="version-badge" title="Versión instalada">v1.2.0</span>
+    </div>
+    <div class="header-actions">
+      <button type="button" id="btnUpdateNotice" class="btn btn-update-pill" hidden onclick="window.AppActions.openUpdateModal()">
+        ¡Nueva versión disponible!
+      </button>
+      <button type="button" class="btn btn-primary" onclick="window.AppActions.openNewMachineModal()">+ Nueva máquina</button>
+      <button type="button" class="btn btn-ghost" onclick="window.AppActions.openExportsFolder()" title="Abrir carpeta donde se guardan las placas de esta marca">Carpeta SVG</button>
+      <button type="button" class="btn btn-ghost" onclick="window.AppActions.openCalibrationModal()">Ajustes</button>
+    </div>
+  </header>
+
+  <main class="workspace-layout">
+
+    <!-- CATÁLOGO DE MÁQUINAS -->
+    <section class="catalog-panel" aria-label="Máquinas">
+      <div class="brand-tabs" role="tablist" aria-label="Filtrar por marca">
+        <button type="button" class="brand-tab-btn active" data-brand-filter="all">
+          <img src="img/brand-all.svg" class="brand-avatar-circle" alt="" />
+          <span class="brand-tab-label">Todas</span>
+          <span id="countAll" class="tab-num">0</span>
+        </button>
+        <button type="button" class="brand-tab-btn" data-brand-filter="zybra">
+          <img src="img/brand-zybra.png" class="brand-avatar-circle" alt="" />
+          <span class="brand-tab-label">Zybra</span>
+          <span id="countZybra" class="tab-num">0</span>
+        </button>
+        <button type="button" class="brand-tab-btn" data-brand-filter="vorma">
+          <img src="img/brand-vorma.png" class="brand-avatar-circle" alt="" />
+          <span class="brand-tab-label">Vorma</span>
+          <span id="countVorma" class="tab-num">0</span>
+        </button>
+        <button type="button" class="brand-tab-btn" data-brand-filter="olsen">
+          <img src="img/brand-olsen.png" class="brand-avatar-circle" alt="" />
+          <span class="brand-tab-label">Olsen &amp; Kael</span>
+          <span id="countOlsen" class="tab-num">0</span>
+        </button>
+      </div>
+
+      <div class="catalog-filters-row">
+        <input type="search" id="catalogSearchInput" class="search-input" placeholder="Buscar modelo..." aria-label="Buscar máquina" />
+        <select id="plateSizeFilter" class="select-input" aria-label="Tamaño de placa">
+          <option value="all">Todos</option>
+          <option value="150x90">150 × 90</option>
+          <option value="110x70">110 × 70</option>
+        </select>
+      </div>
+
+      <div id="machinesGrid" class="machines-grid"></div>
+    </section>
+
+    <!-- ESTACIÓN DEL OPERARIO -->
+    <section class="operator-station" aria-label="Generar placa">
+      <div id="operatorEmptyState" class="empty-station" hidden>
+        <p>Selecciona una máquina de la lista.</p>
+      </div>
+
+      <div id="operatorActiveContent">
+        <div class="station-banner">
+          <div class="station-banner-left">
+            <span id="opBrandBadge" class="brand-chip brand-chip-station">
+              <img id="opBrandAvatar" src="img/brand-vorma.png" class="brand-avatar-circle" alt="" />
+              <span id="opBrandName">Vorma</span>
+            </span>
+            <h2 id="opMachineTitle" class="station-machine-title">—</h2>
+            <span id="opFormatBadge" class="format-pill">150 × 90 mm</span>
+          </div>
+          <button type="button" class="btn btn-sm btn-outline" onclick="window.AppActions.openEditMachineModal()">Editar</button>
+        </div>
+
+        <div class="station-body">
+          <!-- Datos variables -->
+          <div class="operator-inputs-grid">
+            <div class="op-field">
+              <label id="opSerialLabel" for="operatorSerialInput">Serial Number:</label>
+              <div class="serial-input-group">
+                <input type="text" id="operatorSerialInput" class="input-operator-big" placeholder="1803-261101" autocomplete="off" />
+                <button type="button" class="btn-increment-serial" onclick="window.AppActions.incrementOperatorSerial()" title="Siguiente número de serie">+1</button>
+              </div>
+            </div>
+            <div class="op-field">
+              <label id="opDateLabel" for="operatorDateInput">Año:</label>
+              <input type="text" id="operatorDateInput" class="input-operator-big" placeholder="2026" autocomplete="off" />
+            </div>
+          </div>
+
+          <!-- Lienzo estilo xTool Studio -->
+          <div class="xtool-workspace-unit">
+            <div class="xtool-object-bar" role="region" aria-label="Posición en xTool">
+              <div class="xtool-anchor-grid" title="Punto de referencia en xTool: superior izquierdo">
+                <span class="anchor-dot active"></span><span class="anchor-dot"></span><span class="anchor-dot"></span>
+                <span class="anchor-dot"></span><span class="anchor-dot"></span><span class="anchor-dot"></span>
+                <span class="anchor-dot"></span><span class="anchor-dot"></span><span class="anchor-dot"></span>
+              </div>
+
+              <button type="button" class="xtool-num-box highlight-coord" title="Copiar X"
+                      onclick="window.AppActions.copyTextToClipboard(document.getElementById('xtoolBarX').textContent, 'X')">
+                <span class="xtool-prefix">X</span><strong id="xtoolBarX" class="xtool-val">51</strong><span class="xtool-unit">mm</span>
+              </button>
+              <button type="button" class="xtool-num-box highlight-coord" title="Copiar Y"
+                      onclick="window.AppActions.copyTextToClipboard(document.getElementById('xtoolBarY').textContent, 'Y')">
+                <span class="xtool-prefix">Y</span><strong id="xtoolBarY" class="xtool-val">51</strong><span class="xtool-unit">mm</span>
+              </button>
+
+              <div class="xtool-bar-divider"></div>
+
+              <div class="xtool-num-box">
+                <span class="xtool-prefix">W</span><strong id="xtoolBarW" class="xtool-val">150.00</strong><span class="xtool-unit">mm</span>
+              </div>
+              <div class="xtool-num-box">
+                <span class="xtool-prefix">H</span><strong id="xtoolBarH" class="xtool-val">90.00</strong><span class="xtool-unit">mm</span>
+              </div>
+
+              <div class="xtool-view-switcher">
+                <button type="button" id="btnViewPlate" class="view-mode-btn active" onclick="window.AppActions.setCanvasViewMode('plate')">Placa</button>
+                <button type="button" id="btnViewBed" class="view-mode-btn" onclick="window.AppActions.setCanvasViewMode('bed')">Cama xTool</button>
+              </div>
+            </div>
+
+            <div class="xtool-ruler-stage">
+              <div class="ruler-corner">mm</div>
+              <div id="rulerTopBar" class="ruler-top"></div>
+              <div id="rulerLeftBar" class="ruler-left"></div>
+              <div id="xtoolCanvasViewport" class="svg-stage-wrapper">
+                <div id="svgPreviewContainer" class="svg-plate-frame"></div>
+                <div id="xtoolBedSimulationContainer" class="xtool-bed-simulation" hidden></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Exportación -->
+          <div class="export-row">
+            <button type="button" class="btn btn-export-giant" onclick="window.AppActions.exportAndOpenInXTool()">
+              Exportar Placa
+            </button>
+            <button type="button" class="btn btn-outline" onclick="window.AppActions.saveSVGWithNativeDialog()">
+              Guardar como…
+            </button>
+          </div>
+          <code id="exportFilenamePreview" class="export-filename"></code>
+
+          <!-- Historial -->
+          <div class="history-bar">
+            <h4>Últimas placas</h4>
+            <ul id="exportHistoryList" class="history-list"></ul>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- MODAL: CREAR / EDITAR MÁQUINA -->
+  <dialog id="machineEditorDialog" closedby="any" aria-labelledby="machineModalTitle">
+    <div class="modal-header">
+      <h3 id="machineModalTitle">Máquina</h3>
+      <button type="button" class="btn-close-modal" onclick="document.getElementById('machineEditorDialog').close()" aria-label="Cerrar">×</button>
+    </div>
+
+    <form id="machineEditorForm" novalidate>
+      <div class="modal-body-split">
+        <div>
+          <div class="form-section-box">
+            <div class="form-field">
+              <label for="editTemplateSelect">Plantilla</label>
+              <select id="editTemplateSelect" required>
+                <option value="zybra_unica">Zybra — 150 × 90 mm</option>
+                <option value="vorma_grande">Vorma — Grande 150 × 90 mm</option>
+                <option value="vorma_pequena">Vorma — Pequeña 110 × 70 mm</option>
+                <option value="olsen_grande">Olsen &amp; Kael — Grande 150 × 90 mm</option>
+                <option value="olsen_pequena">Olsen &amp; Kael — Pequeña 110 × 70 mm</option>
+              </select>
+              <small id="modalTemplateInfoBadge" class="field-hint"></small>
+            </div>
+          </div>
+
+          <div class="form-section-box">
+            <div class="form-grid-2">
+              <div class="form-field">
+                <label id="modalNameLabel" for="editPrimaryName">Nombre *</label>
+                <input type="text" id="editPrimaryName" required placeholder="Cutter" aria-describedby="nameErrorHint" />
+                <span id="nameErrorHint" class="field-error-hint">Obligatorio.</span>
+              </div>
+              <div class="form-field">
+                <label id="modalModelLabel" for="editPrimaryModel">Modelo *</label>
+                <input type="text" id="editPrimaryModel" required placeholder="BC40" aria-describedby="modelErrorHint" />
+                <span id="modelErrorHint" class="field-error-hint">Obligatorio.</span>
+              </div>
+              <div class="form-field">
+                <label id="modalSerialLabel" for="editDefaultSerial">Nº de serie inicial</label>
+                <input type="text" id="editDefaultSerial" placeholder="1803-261101" />
+              </div>
+              <div class="form-field">
+                <label id="modalDateLabel" for="editDefaultDate">Año</label>
+                <input type="text" id="editDefaultDate" placeholder="2026" />
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section-box">
+            <h4>Datos técnicos</h4>
+            <div id="modalSchemaPresetsBar" class="schema-presets-bar"></div>
+            <div class="slots-columns-grid">
+              <div><div class="slots-col-title">Izquierda</div><div id="modalSlotsLeftCol"></div></div>
+              <div><div class="slots-col-title">Derecha</div><div id="modalSlotsRightCol"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-preview-panel">
+          <div id="modalSvgPreviewBox" class="modal-svg-box"></div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <div id="modalManageBtns" class="modal-manage-btns">
+          <button type="button" class="btn btn-sm btn-outline" onclick="window.AppActions.duplicateFromModal()">Duplicar</button>
+          <button type="button" class="btn btn-sm btn-danger" onclick="window.AppActions.deleteFromModal()">Eliminar</button>
+        </div>
+        <button type="button" class="btn btn-outline" onclick="document.getElementById('machineEditorDialog').close()">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Guardar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <datalist id="technicalLabelsList">
+    <option value="Volt"></option><option value="Voltage"></option><option value="Hz"></option>
+    <option value="Fase"></option><option value="Motor"></option><option value="Power"></option>
+    <option value="Kw"></option><option value="Weigth"></option><option value="Weight"></option>
+    <option value="Size"></option><option value="Pressure"></option><option value="Capacity"></option>
+    <option value="Volume"></option><option value="Velocity"></option><option value="Vel blade"></option>
+    <option value="Date"></option><option value="RPM"></option>
+  </datalist>
+
+  <!-- MODAL: AJUSTES -->
+  <dialog id="calibrationDialog" closedby="any" aria-labelledby="calibrationModalTitle">
+    <div class="modal-header">
+      <h3 id="calibrationModalTitle">Ajustes</h3>
+      <button type="button" class="btn-close-modal" onclick="document.getElementById('calibrationDialog').close()" aria-label="Cerrar">×</button>
+    </div>
+
+    <form id="calibrationForm" class="calibration-form">
+      <h4>Posición en xTool y área de diseño</h4>
+      <table class="calibration-table">
+        <thead>
+          <tr><th>Plantilla</th><th>Placa</th><th>Área interior (mm)</th><th>Posición xTool</th></tr>
+        </thead>
+        <tbody id="calibrationTableBody"></tbody>
+      </table>
+
+      <details class="advanced-box">
+        <summary>Opciones avanzadas de exportación</summary>
+        <div class="form-grid-2">
+          <div class="form-field">
+            <label for="settingExportCropMode">Tamaño del SVG</label>
+            <select id="settingExportCropMode">
+              <option value="full_plate">Placa completa</option>
+              <option value="inner_artbox">Recortado al área interior</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label for="settingZybraKnockoutMode">Texto blanco en Zybra</label>
+            <select id="settingZybraKnockoutMode">
+              <option value="compound">Vaciado (recomendado)</option>
+              <option value="layered">Capas separadas</option>
+            </select>
+          </div>
+        </div>
+        <label class="check-row">
+          <input type="checkbox" id="settingLockInnerBounds" />
+          Incluir marco invisible del área interior
+        </label>
+      </details>
+
+      <div class="db-row">
+        <span>Copia de seguridad de máquinas:</span>
+        <button type="button" class="btn btn-sm btn-outline" onclick="window.AppActions.exportDatabaseJSON()">Exportar</button>
+        <label class="btn btn-sm btn-outline">
+          Importar
+          <input type="file" id="importJsonFileInput" accept=".json,application/json" hidden />
+        </label>
+        <button type="button" class="btn btn-sm btn-outline" style="margin-left:auto;" onclick="window.AppActions.checkForUpdates(true)">
+          Buscar actualizaciones
+        </button>
+      </div>
+
+      <div class="modal-footer flush">
+        <button type="button" class="btn btn-outline" onclick="window.AppActions.resetCalibrationDefaults()" style="margin-right:auto;">Restaurar</button>
+        <button type="button" class="btn btn-outline" onclick="document.getElementById('calibrationDialog').close()">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Guardar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- MODAL: ACTUALIZACIÓN AUTOMÁTICA DESDE GITHUB -->
+  <dialog id="updateDialog" closedby="any" aria-labelledby="updateModalTitle">
+    <div class="modal-header">
+      <h3 id="updateModalTitle">Actualización del Programa</h3>
+      <button type="button" class="btn-close-modal" onclick="document.getElementById('updateDialog').close()" aria-label="Cerrar">×</button>
+    </div>
+    <div class="update-modal-body">
+      <div class="update-version-row">
+        <div class="update-ver-card">
+          <span class="update-ver-label">Versión actual</span>
+          <strong id="updateCurrentVerText">v1.2.0</strong>
+        </div>
+        <span class="update-ver-arrow">→</span>
+        <div class="update-ver-card highlight">
+          <span class="update-ver-label">Nueva versión</span>
+          <strong id="updateLatestVerText">v1.2.0</strong>
+        </div>
+      </div>
+      <p id="updateStatusLead" class="update-lead">
+        Hay una nueva versión disponible en GitHub. Al pulsar <strong>Actualizar ahora</strong>, el programa descargará las mejoras automáticamente conservando todas tus máquinas y placas guardadas.
+      </p>
+      <div id="updateNotesBox" class="update-notes-box"></div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-outline" onclick="document.getElementById('updateDialog').close()">Más tarde</button>
+      <button type="button" id="btnPerformUpdateNow" class="btn btn-primary" onclick="window.AppActions.performOneClickUpdate()">
+        Actualizar programa ahora
+      </button>
+    </div>
+  </dialog>
+
+  <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+  <script src="js/opentype.min.js"></script>
+  <script src="js/fonts-data.js"></script>
+  <script src="js/templates.js"></script>
+  <script src="js/initial-data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
