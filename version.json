@@ -1,7 +1,7 @@
 {
   "version": "1.2.0",
   "releasedAt": "2026-10-26",
-  "repo": "raul-OO8/placas-xtool",
+  "repo": "raul-OO8/Placas-Ident",
   "notes": "Parámetros láser xTool preconfigurados para todas las marcas y medidas (Vorma Grande y Pequeña en Acero Inoxidable 304; Olsen & Kael y Zybra en Acero Inoxidable pintado de negro), exportación directa (.xcs + .svg), apertura inteligente de carpeta por marca, mayor cuerpo tipográfico en bloques Zybra y sistema de actualización en 1 clic.",
   "files": [
     "version.json",

@@ -23,7 +23,7 @@ const DATA_DIR = path.join(ROOT_DIR, 'data');
 const DB_FILE = path.join(DATA_DIR, 'maquinas.json');
 const EXPORTS_DIR = path.join(ROOT_DIR, 'Exportados_xTool');
 const VERSION_FILE = path.join(ROOT_DIR, 'version.json');
-const DEFAULT_GITHUB_REPO = 'raul-OO8/placas-xtool';
+const DEFAULT_GITHUB_REPO = 'raul-OO8/Placas-Ident';
 
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 if (!fs.existsSync(EXPORTS_DIR)) fs.mkdirSync(EXPORTS_DIR, { recursive: true });
