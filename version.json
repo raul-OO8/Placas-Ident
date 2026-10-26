@@ -1,8 +1,8 @@
 {
-  "version": "1.2.0",
+  "version": "1.2.1",
   "releasedAt": "2026-10-26",
   "repo": "raul-OO8/Placas-Ident",
-  "notes": "Parámetros láser xTool preconfigurados para todas las marcas y medidas (Vorma Grande y Pequeña en Acero Inoxidable 304; Olsen & Kael y Zybra en Acero Inoxidable pintado de negro), exportación directa (.xcs + .svg), apertura inteligente de carpeta por marca, mayor cuerpo tipográfico en bloques Zybra y sistema de actualización en 1 clic.",
+  "notes": "Versión 1.2.1: Firma digital Authenticode oficial (Zybra & Vorma Maschinen GmbH), instalador ZIP sin advertencias de seguridad de Windows y optimización del sistema de actualización.",
   "files": [
     "version.json",
     "index.html",
