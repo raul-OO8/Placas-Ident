@@ -27,23 +27,48 @@
 
 ## 🚀 Guía de Instalación para Windows (1 Clic)
 
-El programa dispone de su propio **instalador ejecutable oficial para Windows**:
+Elige la opción que prefieras para instalar el programa en tu ordenador:
 
 <div align="center">
 
-[![Descargar Instalador](https://img.shields.io/badge/Descargar_Instalador_Oficial-Instalador__Placas__xTool__Setup.exe-44af65?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/raul-OO8/Placas-Ident/releases/download/v1.2.0/Instalador_Placas_xTool_Setup.exe)
+[![Descargar Instalador Limpio ZIP](https://img.shields.io/badge/Opción_1_(Recomendada_Sin_Avisos)-Descargar_ZIP_con_Instalador-44af65?style=for-the-badge&logo=zip&logoColor=white)](https://github.com/raul-OO8/Placas-Ident/releases/download/v1.2.0/Placas_xTool_Instalador.zip)
+&nbsp;&nbsp;
+[![Descargar EXE Directo](https://img.shields.io/badge/Opción_2-Instalador__Placas__xTool__Setup.exe-161a18?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/raul-OO8/Placas-Ident/releases/download/v1.2.0/Instalador_Placas_xTool_Setup.exe)
 
 </div>
 
-### Proceso de instalación en 2 pasos:
+### Opción 1: Paquete ZIP Automático (Recomendado — Cero Advertencias)
+1. Descarga [**`Placas_xTool_Instalador.zip`**](https://github.com/raul-OO8/Placas-Ident/releases/download/v1.2.0/Placas_xTool_Instalador.zip) y descomprímelo.
+2. Haz doble clic en **`Instalar.bat`**.
+3. Se abrirá directamente el instalador visual en pantalla sin ninguna ventana de advertencia de Windows.
 
-1. **Descargar**: Haz clic en el botón superior o descarga el archivo [**`Instalador_Placas_xTool_Setup.exe`**](https://github.com/raul-OO8/Placas-Ident/releases/download/v1.2.0/Instalador_Placas_xTool_Setup.exe).
-2. **Instalar**: Haz **doble clic** sobre el archivo descargado y pulsa **«Instalar»**:
-   - Se instala automáticamente como cualquier programa de Windows en tu equipo (`%LocalAppData%\Programs\Placas_xTool`).
-   - Crea el acceso directo con icono nítido de alta resolución en tu **Escritorio** y en el **Menú Inicio**.
-   - Queda registrado en **Configuración de Windows > Aplicaciones instaladas** (con su desinstalador incluido).
-   - Incluye su propio motor autónomo integrado (no requiere que el usuario instale nada adicional).
-   - Se abre de inmediato al terminar.
+---
+
+### Opción 2: Instalador `.exe` Directo
+1. Descarga [**`Instalador_Placas_xTool_Setup.exe`**](https://github.com/raul-OO8/Placas-Ident/releases/download/v1.2.0/Instalador_Placas_xTool_Setup.exe).
+2. Haz doble clic para abrirlo.
+3. **¿Te sale el aviso de Windows «No se pudo comprobar el editor»?**
+   - Es la protección habitual de Windows al descargar cualquier `.exe` de internet por primera vez.
+   - Solo debes pulsar el botón **«Ejecutar»** (o desmarcar *«Preguntar siempre antes de abrir este archivo»* y pulsar *«Ejecutar»*).
+   - > **Nota importante:** Este aviso **solo sale 1 vez durante la instalación**. Una vez instalado, el acceso directo en tu Escritorio abrirá el programa siempre al instante sin volver a pedir confirmación nunca más.
+
+---
+
+### Opción 3: Instalación Instantánea por PowerShell (1 Línea)
+Abre la consola de Windows (o pulsa `Win + R`), pega este comando y pulsa `Enter`:
+```powershell
+irm https://raw.githubusercontent.com/raul-OO8/Placas-Ident/main/instalar.ps1 | iex
+```
+*Descarga, desbloquea los permisos de Windows automáticamente y abre el instalador visual de inmediato.*
+
+---
+
+### ✨ Qué hace el instalador automáticamente:
+- Instala la aplicación en tu equipo (`%LocalAppData%\Programs\Placas_xTool`).
+- Crea el acceso directo con icono nítido de alta resolución en tu **Escritorio** y en el **Menú Inicio**.
+- Registra el programa en **Configuración de Windows > Aplicaciones instaladas** (con desinstalador completo).
+- Incluye su motor autónomo integrado (no requiere instalar nada más).
+- Se abre listo para trabajar al finalizar.
 
 ---
 

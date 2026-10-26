@@ -1,0 +1,18 @@
+============================================================
+ GENERADOR DE PLACAS XTOOL — GUIA DE INSTALACION
+ Zybra & Vorma Maschinen GmbH
+============================================================
+
+OPCION 1 (RECOMENDADA - Instalacion limpia sin advertencias):
+1. Descomprime esta carpeta ZIP en tu ordenador.
+2. Haz doble clic sobre "Instalar.bat".
+3. Se abrira directamente el instalador visual en pantalla.
+
+OPCION 2 (Instalador directo):
+1. Haz doble clic sobre "Instalador_Placas_xTool_Setup.exe".
+2. Si Windows muestra una ventana de confirmacion ("Editor desconocido"),
+   pulsa el boton "Ejecutar".
+   (Nota: Esto solo ocurre una unica vez durante la instalacion inicial.
+   Una vez instalado, el programa queda integrado en Windows y
+   se abrira siempre al instante desde el escritorio sin avisos).
+============================================================
