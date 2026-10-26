@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Instalador — Placas xTool</title>
+  <link rel="icon" type="image/png" sizes="256x256" href="icon_256.png?v=6" />
+  <style>
+    :root {
+      --green: #44af65;
+      --green-darker: #1f6b38;
+      --green-soft: #ecfdf5;
+      --dark: #161a18;
+      --bg: #f4f6f5;
+      --surface: #ffffff;
+      --text: #1a1f1c;
+      --muted: #64748b;
+      --border: #d9dfdb;
+      --brand-vorma: #e7246b;
+      --brand-olsen: #dddd19;
+      --brand-zybra: #2e2e2e;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.45;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    /* Cabecera Técnica */
+    .installer-header {
+      background: var(--dark);
+      color: #ffffff;
+      padding: 0.9rem 1.6rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 3px solid var(--green);
+    }
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .header-brand img {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+    }
+    .header-brand h1 {
+      margin: 0;
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+    .badge-ver {
+      background: rgba(255, 255, 255, 0.12);
+      color: #94a3b8;
+      font-size: 0.75rem;
+      padding: 0.2rem 0.55rem;
+      border-radius: 999px;
+      font-family: ui-monospace, monospace;
+      font-weight: 600;
+    }
+
+    /* Contenedor Principal */
+    .installer-main {
+      flex: 1;
+      padding: 1.8rem 2rem;
+      max-width: 680px;
+      margin: 0 auto;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 1.4rem;
+    }
+
+    .hero-text {
+      text-align: center;
+    }
+    .hero-text h2 {
+      margin: 0 0 0.4rem;
+      font-size: 1.45rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--dark);
+    }
+    .hero-text p {
+      margin: 0;
+      font-size: 0.92rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    /* Vitrina de Marcas */
+    .brands-showcase {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.8rem;
+    }
+    .brand-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.85rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .brand-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+    }
+    .brand-card.vorma::before { background: var(--brand-vorma); }
+    .brand-card.olsen::before { background: var(--brand-olsen); }
+    .brand-card.zybra::before { background: var(--brand-zybra); }
+
+    .brand-card-top {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .brand-card-top img {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+    }
+    .brand-card-top strong {
+      font-size: 0.9rem;
+      color: var(--text);
+    }
+    .brand-card-meta {
+      font-size: 0.74rem;
+      color: var(--muted);
+      line-height: 1.35;
+    }
+    .brand-card-tag {
+      font-size: 0.7rem;
+      font-weight: 600;
+      background: #f1f5f9;
+      color: #475569;
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+      width: fit-content;
+      margin-top: 0.2rem;
+    }
+
+    /* Checklist de Configuración */
+    .checklist-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.1rem 1.3rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .check-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.88rem;
+    }
+    .check-icon {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #e2e8f0;
+      color: #64748b;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.78rem;
+      flex-shrink: 0;
+      transition: all 0.25s ease;
+    }
+    .check-item.done .check-icon {
+      background: var(--green);
+      color: #ffffff;
+    }
+    .check-item.active .check-icon {
+      background: #f59e0b;
+      color: #ffffff;
+      animation: pulseDot 1.4s infinite;
+    }
+    @keyframes pulseDot {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.15); opacity: 0.85; }
+    }
+    .check-label {
+      flex: 1;
+      font-weight: 500;
+    }
+    .check-status {
+      font-size: 0.76rem;
+      color: var(--muted);
+      font-family: ui-monospace, monospace;
+    }
+
+    /* Botón de Acción Principal */
+    .action-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      align-items: center;
+    }
+    .btn-install-giant {
+      width: 100%;
+      background: var(--green);
+      color: #ffffff;
+      border: none;
+      border-radius: 9px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      padding: 0.95rem 1.4rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      box-shadow: 0 4px 14px rgba(68, 175, 101, 0.35);
+      transition: background-color 0.15s, transform 0.05s, box-shadow 0.15s;
+    }
+    .btn-install-giant:hover:not(:disabled) {
+      background: var(--green-darker);
+      box-shadow: 0 6px 18px rgba(31, 107, 56, 0.4);
+    }
+    .btn-install-giant:active:not(:disabled) {
+      transform: translateY(1px);
+    }
+    .btn-install-giant:disabled {
+      opacity: 0.65;
+      cursor: wait;
+      box-shadow: none;
+    }
+
+    .install-hint {
+      font-size: 0.76rem;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    /* Pie */
+    .installer-footer {
+      background: #ffffff;
+      border-top: 1px solid var(--border);
+      padding: 0.75rem 1.6rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- CABECERA -->
+  <header class="installer-header">
+    <div class="header-brand">
+      <img src="app-icon.svg" alt="Placas xTool" />
+      <h1>Studio Placas xTool</h1>
+    </div>
+    <span class="badge-ver">v1.2.0</span>
+  </header>
+
+  <!-- CONTENIDO -->
+  <main class="installer-main">
+    <div class="hero-text">
+      <h2>Instalador Rápido de Escritorio</h2>
+      <p>Configura el acceso directo con icono nítido en tu Escritorio y prepara las plantillas calibradas para <strong>xTool Studio (F1 Ultra)</strong> en un solo clic.</p>
+    </div>
+
+    <!-- TARJETAS DE LAS 3 MARCAS -->
+    <div class="brands-showcase">
+      <div class="brand-card vorma">
+        <div class="brand-card-top">
+          <img src="img/brand-vorma.png" alt="" />
+          <strong>Vorma</strong>
+        </div>
+        <div class="brand-card-meta">Acero Inox 304 (0.5 mm)</div>
+        <div class="brand-card-tag">150×90 · 110×70</div>
+      </div>
+
+      <div class="brand-card olsen">
+        <div class="brand-card-top">
+          <img src="img/brand-olsen.png" alt="" />
+          <strong>Olsen &amp; Kael</strong>
+        </div>
+        <div class="brand-card-meta">Inox Pintado Negro (1 mm)</div>
+        <div class="brand-card-tag">150×90 · 110×70</div>
+      </div>
+
+      <div class="brand-card zybra">
+        <div class="brand-card-top">
+          <img src="img/brand-zybra.png" alt="" />
+          <strong>Zybra</strong>
+        </div>
+        <div class="brand-card-meta">Inox Pintado Negro (1 mm)</div>
+        <div class="brand-card-tag">150×90 mm</div>
+      </div>
+    </div>
+
+    <!-- ESTADO DE LA CONFIGURACIÓN -->
+    <div class="checklist-card">
+      <div id="stepEngine" class="check-item done">
+        <span class="check-icon">✓</span>
+        <span class="check-label">Motor local de escritorio y base de datos de máquinas</span>
+        <span class="check-status">LISTO</span>
+      </div>
+      <div id="stepPresets" class="check-item done">
+        <span class="check-icon">✓</span>
+        <span class="check-label">Parámetros láser y coordenadas xTool F1 Ultra configurados</span>
+        <span class="check-status">CALIBRADO</span>
+      </div>
+      <div id="stepShortcut" class="check-item">
+        <span class="check-icon">3</span>
+        <span class="check-label">Acceso directo en el Escritorio con icono de alta resolución</span>
+        <span id="stepShortcutStatus" class="check-status">PENDIENTE</span>
+      </div>
+    </div>
+
+    <!-- ACCIÓN -->
+    <div class="action-panel">
+      <button type="button" id="btnInstallAction" class="btn-install-giant" onclick="executeInstallProcess()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+        <span>Crear Acceso Directo y Abrir Programa</span>
+      </button>
+      <div id="installHintText" class="install-hint">
+        Colocará el icono en tu Escritorio y abrirá la estación de trabajo automáticamente.
+      </div>
+    </div>
+  </main>
+
+  <!-- PIE -->
+  <footer class="installer-footer">
+    <span>Zybra · Vorma Maschinen GmbH · Olsen &amp; Kael</span>
+    <span>Exportación nativa .xcs (xTool Studio v2)</span>
+  </footer>
+
+  <script>
+    async function executeInstallProcess() {
+      const btn = document.getElementById('btnInstallAction');
+      const stepEl = document.getElementById('stepShortcut');
+      const stepStatus = document.getElementById('stepShortcutStatus');
+      const hint = document.getElementById('installHintText');
+
+      btn.disabled = true;
+      btn.innerHTML = '<span>Configurando acceso directo en el Escritorio...</span>';
+      stepEl.className = 'check-item active';
+      stepStatus.textContent = 'CREANDO...';
+
+      try {
+        // 1. Crear el acceso directo en el Escritorio
+        const res = await fetch('/api/create-desktop-shortcut', { method: 'POST' });
+        await new Promise(r => setTimeout(r, 650));
+
+        stepEl.className = 'check-item done';
+        stepEl.querySelector('.check-icon').textContent = '✓';
+        stepStatus.textContent = 'CREADO';
+
+        btn.innerHTML = '<span>¡Instalación lista! Abriendo Placas xTool...</span>';
+        hint.textContent = 'El acceso directo se ha creado con éxito en tu Escritorio.';
+
+        // 2. Abrir la aplicación principal
+        await fetch('/api/launch-app', { method: 'POST' });
+
+        // 3. Cerrar la ventana del instalador suavemente tras abrir la app
+        setTimeout(() => {
+          window.close();
+        }, 1500);
+
+      } catch (err) {
+        btn.disabled = false;
+        btn.innerHTML = '<span>Reintentar creación de acceso directo</span>';
+        hint.textContent = 'Hubo un inconveniente al crear el acceso directo: ' + err.message;
+      }
+    }
+  </script>
+</body>
+</html>

@@ -784,36 +784,30 @@ async function saveSVGWithNativeDialog() {
 }
 
 /**
- * Abre la carpeta específica donde se guardan las placas de la marca seleccionada en el Explorador de Windows
+ * Abre instantáneamente la carpeta donde se guardan las placas de la marca seleccionada
  */
 async function openExportsFolder(filePath = null) {
   const machine = getSelectedMachine();
   const tpl = machine ? getEffectiveTemplateConfig(machine.templateId) : null;
   const brandName = tpl ? tpl.brandName : null;
 
-  // Si no se especificó un archivo concreto, buscar si hay uno recién exportado de esta misma marca
-  let targetFile = filePath;
-  if (!targetFile && brandName && Array.isArray(AppState.exportHistory)) {
-    const recentForBrand = AppState.exportHistory.find(h => h.brandName === brandName && h.savedPathOnDisk);
-    if (recentForBrand) targetFile = recentForBrand.savedPathOnDisk;
-  }
-
   if (location.protocol.startsWith('http')) {
-    try {
-      await fetch('/api/open-exports-folder', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          filePath: targetFile,
-          brand: brandName
-        })
-      });
-      showToastNotification(
-        brandName ? `Abriendo carpeta: Exportados_xTool/${brandName}` : 'Abriendo carpeta: Exportados_xTool',
-        'info'
-      );
-      return;
-    } catch (_) {}
+    // Si se pasa un archivo explícito (por ejemplo desde el historial "Ver archivo"), se selecciona;
+    // si se pulsa el botón principal "Carpeta", se abre la carpeta de inmediato sin el retardo de /select
+    fetch('/api/open-exports-folder', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        filePath: filePath,
+        brand: brandName
+      })
+    }).catch(() => {});
+
+    showToastNotification(
+      brandName ? `Abriendo carpeta: Exportados_xTool/${brandName}` : 'Abriendo carpeta: Exportados_xTool',
+      'info'
+    );
+    return;
   }
   showToastNotification('Carpeta local: Exportados_xTool', 'info');
 }

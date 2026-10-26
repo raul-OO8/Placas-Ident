@@ -175,18 +175,20 @@ function savePlateFilesToExportsFolder({ brand, templateId, xToolX, xToolY, file
 }
 
 /**
- * Abre el Explorador de Windows en primer plano mostrando la carpeta o resaltando el archivo indicado
+ * Abre el Explorador de Windows de manera instantánea en primer plano
  */
+function openFolderInstantly(folderPath) {
+  const cleanDir = path.resolve(String(folderPath || EXPORTS_DIR));
+  if (!fs.existsSync(cleanDir)) fs.mkdirSync(cleanDir, { recursive: true });
+  exec(`start "" "${cleanDir}"`);
+}
+
 function openExplorerInForeground(targetPath, selectFile = false) {
   const cleanPath = path.resolve(String(targetPath || EXPORTS_DIR));
   if (selectFile && fs.existsSync(cleanPath)) {
     exec(`explorer.exe /select,"${cleanPath}"`);
   } else {
-    const dirToOpen = fs.existsSync(cleanPath) && fs.statSync(cleanPath).isDirectory()
-      ? cleanPath
-      : path.dirname(cleanPath);
-    if (!fs.existsSync(dirToOpen)) fs.mkdirSync(dirToOpen, { recursive: true });
-    exec(`explorer.exe "${dirToOpen}"`);
+    openFolderInstantly(cleanPath);
   }
 }
 
@@ -460,7 +462,7 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
-    // 8. Abrir la carpeta donde se guarda el archivo de la marca seleccionada en el Explorador de Windows
+    // 8. Abrir instantáneamente la carpeta donde se guarda la placa de la marca seleccionada
     if (pathname === '/api/open-exports-folder' && req.method === 'POST') {
       let targetFile = null;
       let brand = null;
@@ -473,6 +475,7 @@ const server = http.createServer(async (req, res) => {
         }
       } catch (_) {}
 
+      // Si se indicó un archivo específico y existe
       if (targetFile && fs.existsSync(targetFile)) {
         openExplorerInForeground(targetFile, true);
         res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
@@ -480,39 +483,55 @@ const server = http.createServer(async (req, res) => {
         return;
       }
 
-      // Si se indicó la marca activa, abrir directamente la subcarpeta de esa marca (Exportados_xTool/<Marca>/)
+      // Si se solicita abrir la carpeta de la marca activa
       let folderToOpen = EXPORTS_DIR;
       if (brand) {
         const safeBrand = String(brand).replace(/[\\/:*?"<>|]+/g, '_').trim();
         if (safeBrand) {
           folderToOpen = path.join(EXPORTS_DIR, safeBrand);
-          if (!fs.existsSync(folderToOpen)) {
-            fs.mkdirSync(folderToOpen, { recursive: true });
-          }
         }
       }
 
-      // Si hay archivos dentro de esa carpeta, seleccionar el más reciente para que el usuario lo vea al instante
-      let newestFile = null;
-      try {
-        const files = fs.readdirSync(folderToOpen)
-          .filter(f => /\.(xcs|svg)$/i.test(f))
-          .map(f => {
-            const full = path.join(folderToOpen, f);
-            return { full, mtime: fs.statSync(full).mtimeMs };
-          })
-          .sort((a, b) => b.mtime - a.mtime);
-        if (files.length > 0) newestFile = files[0].full;
-      } catch (_) {}
-
-      if (newestFile) {
-        openExplorerInForeground(newestFile, true);
-      } else {
-        openExplorerInForeground(folderToOpen, false);
-      }
-
+      openFolderInstantly(folderToOpen);
       res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
       res.end(JSON.stringify({ ok: true, exportsDir: folderToOpen }));
+      return;
+    }
+
+    // 9. Crear acceso directo en el escritorio y lanzar la aplicación desde el instalador visual
+    if (pathname === '/api/create-desktop-shortcut' && req.method === 'POST') {
+      const psCommand = `
+        $ws = New-Object -ComObject WScript.Shell;
+        $desktop = [Environment]::GetFolderPath('Desktop');
+        $shortcut = $ws.CreateShortcut((Join-Path $desktop 'Placas xTool.lnk'));
+        $shortcut.TargetPath = '${path.join(ROOT_DIR, 'Generador_Placas_xTool.exe').replace(/'/g, "''")}';
+        $shortcut.WorkingDirectory = '${ROOT_DIR.replace(/'/g, "''")}';
+        $icon = '${path.join(ROOT_DIR, 'Placas_xTool_Icon_v6.ico').replace(/'/g, "''")}';
+        $shortcut.IconLocation = $icon + ',0';
+        $shortcut.Description = 'Generador de Placas Técnicas para xTool Studio';
+        $shortcut.Save();
+      `;
+      const encoded = Buffer.from(psCommand, 'utf16le').toString('base64');
+      exec(`powershell.exe -NoProfile -WindowStyle Hidden -EncodedCommand ${encoded}`, (err) => {
+        if (err) {
+          res.writeHead(500, { 'Content-Type': 'application/json; charset=utf-8' });
+          res.end(JSON.stringify({ ok: false, error: err.message }));
+        } else {
+          res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+          res.end(JSON.stringify({ ok: true }));
+        }
+      });
+      return;
+    }
+
+    // 10. Lanzar la aplicación principal desde el instalador
+    if (pathname === '/api/launch-app' && req.method === 'POST') {
+      const exePath = path.join(ROOT_DIR, 'Generador_Placas_xTool.exe');
+      if (fs.existsSync(exePath)) {
+        exec(`start "" "${exePath}"`);
+      }
+      res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify({ ok: true }));
       return;
     }
 
