@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -14,8 +15,8 @@ using System.Windows.Forms;
 [assembly: AssemblyDescription("Generador de Placas Técnicas para xTool Studio")]
 [assembly: AssemblyCompany("Zybra · Vorma · Olsen & Kael")]
 [assembly: AssemblyProduct("Placas xTool")]
-[assembly: AssemblyVersion("1.2.1.0")]
-[assembly: AssemblyFileVersion("1.2.1.0")]
+[assembly: AssemblyVersion("1.2.2.0")]
+[assembly: AssemblyFileVersion("1.2.2.0")]
 
 namespace PlacasXToolDesktop
 {
@@ -23,6 +24,7 @@ namespace PlacasXToolDesktop
     {
         private const int PORT = 3456;
         private const string APP_USER_MODEL_ID = "PlacasXTool.DesktopApp.v6";
+        private const string RELEASE_INSTALLER_URL = "https://github.com/raul-OO8/Placas-Ident/releases/latest/download/Instalador_Placas_xTool_Setup.exe";
         private static Process serverProcess = null;
 
         [DllImport("shell32.dll", SetLastError = true)]
@@ -90,12 +92,7 @@ namespace PlacasXToolDesktop
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
         private static extern IntPtr SendMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
 
-        [DllImport("user32.dll", CharSet = CharSet.Auto)]
-        private static extern IntPtr SetClassLongPtr64(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
-
         private const uint WM_SETICON = 0x0080;
-        private const int GCLP_HICON = -14;
-        private const int GCLP_HICONSM = -34;
         private static readonly IntPtr ICON_SMALL = new IntPtr(0);
         private static readonly IntPtr ICON_BIG = new IntPtr(1);
 
@@ -133,22 +130,33 @@ namespace PlacasXToolDesktop
                 return;
             }
 
-            bool serverAlreadyRunning = IsPortOpen("127.0.0.1", PORT, 200);
-            bool startedByUs = false;
+            bool serverReady = IsServerHttpReady(PORT, 300);
 
-            if (!serverAlreadyRunning)
+            if (!serverReady)
             {
-                string nodeExe = FindNodeExecutable();
+                string nodeExe = FindNodeExecutable(appDir);
                 if (string.IsNullOrEmpty(nodeExe))
                 {
+                    // Si el usuario descargó el ZIP del código fuente en lugar del instalador oficial,
+                    // descargar y ejecutar automáticamente el instalador oficial con el motor integrado.
+                    if (DownloadAndRunOfficialInstaller())
+                    {
+                        return;
+                    }
+
                     MessageBox.Show(
-                        "No se encontró Node.js en el sistema para iniciar el servicio local.",
-                        "Placas xTool",
+                        "No se encontró el motor local (node.exe) porque se descargó únicamente el código fuente sin el instalador.\n\n" +
+                        "Por favor, descarga y ejecuta 'Instalador_Placas_xTool_Setup.exe' desde la sección Releases de GitHub.",
+                        "Placas xTool — Falta motor local",
                         MessageBoxButtons.OK,
-                        MessageBoxIcon.Error
+                        MessageBoxIcon.Warning
                     );
                     return;
                 }
+
+                // Desbloquear node.exe por si Windows SmartScreen/Zone.Identifier lo retiene
+                TryUnblockFile(nodeExe);
+                TryUnblockFile(serverScript);
 
                 ProcessStartInfo psi = new ProcessStartInfo
                 {
@@ -163,7 +171,6 @@ namespace PlacasXToolDesktop
                 try
                 {
                     serverProcess = Process.Start(psi);
-                    startedByUs = true;
                 }
                 catch (Exception ex)
                 {
@@ -176,11 +183,27 @@ namespace PlacasXToolDesktop
                     return;
                 }
 
-                for (int i = 0; i < 45; i++)
+                // Esperar hasta 15 segundos a que el servidor HTTP responda (en el primer arranque Windows Defender escanea node.exe)
+                for (int i = 0; i < 150; i++)
                 {
-                    if (IsPortOpen("127.0.0.1", PORT, 100))
+                    if (IsServerHttpReady(PORT, 150))
+                    {
+                        serverReady = true;
                         break;
-                    Thread.Sleep(80);
+                    }
+                    Thread.Sleep(100);
+                }
+
+                if (!serverReady)
+                {
+                    MessageBox.Show(
+                        "El motor local tardó demasiado en responder en el puerto " + PORT + " o fue bloqueado por el antivirus.\n\n" +
+                        "Vuelve a abrir 'Placas xTool' para reintentar la conexión.",
+                        "Placas xTool",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Warning
+                    );
+                    return;
                 }
             }
 
@@ -206,7 +229,7 @@ namespace PlacasXToolDesktop
                 {
                     FileName = desktopBrowser,
                     Arguments = string.Format(
-                        "--app=\"{0}\" --user-data-dir=\"{1}\" --window-size=1560,940 --no-first-run --no-default-browser-check --disable-extensions --disable-features=Translate",
+                        "--app=\"{0}\" --user-data-dir=\"{1}\" --window-size=1560,940 --no-first-run --no-default-browser-check --disable-extensions --disable-features=Translate,RendererCodeIntegrity",
                         appUrl,
                         profileDir
                     ),
@@ -218,8 +241,8 @@ namespace PlacasXToolDesktop
                     Process uiProc = Process.Start(uiPsi);
                     if (uiProc != null)
                     {
-                        ThreadPool.QueueUserWorkItem(_ => ApplyCrispWindowIcon(appDir, 25));
-                        uiProc.WaitForExit();
+                        // Aplicar el icono nítido a la ventana mientras está abierta
+                        ApplyCrispWindowIcon(appDir, 25);
                     }
                 }
                 catch
@@ -230,23 +253,92 @@ namespace PlacasXToolDesktop
             else
             {
                 Process.Start(appUrl);
-                if (startedByUs && serverProcess != null && !serverProcess.HasExited)
-                {
-                    serverProcess.WaitForExit();
-                }
             }
 
-            if (startedByUs && serverProcess != null)
+            // IMPORTANTE: NO matar serverProcess al salir de uiProc.WaitForExit().
+            // En Windows 10/11, Microsoft Edge con "Startup Boost / Inicio rápido" delega la creación de la ventana
+            // al proceso principal de Edge y cierra uiProc en <100ms. Si matáramos serverProcess aquí,
+            // Edge recibiría ERR_CONNECTION_REFUSED (127.0.0.1 rechazó la conexión).
+            // El servidor Node queda activo en segundo plano de forma ligera e instantánea.
+        }
+
+        private static void TryUnblockFile(string filePath)
+        {
+            try
             {
-                try
+                if (File.Exists(filePath))
                 {
-                    if (!serverProcess.HasExited)
-                    {
-                        serverProcess.Kill();
-                        serverProcess.Dispose();
-                    }
+                    File.Delete(filePath + ":Zone.Identifier");
                 }
-                catch { }
+            }
+            catch { }
+        }
+
+        private static bool DownloadAndRunOfficialInstaller()
+        {
+            try
+            {
+                ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072; // TLS 1.2
+                string tempSetup = Path.Combine(Path.GetTempPath(), "Instalador_Placas_xTool_Setup.exe");
+
+                using (Form progressForm = new Form())
+                {
+                    progressForm.Text = "Placas xTool — Configurando motor local...";
+                    progressForm.Width = 440;
+                    progressForm.Height = 140;
+                    progressForm.FormBorderStyle = FormBorderStyle.FixedDialog;
+                    progressForm.StartPosition = FormStartPosition.CenterScreen;
+                    progressForm.MaximizeBox = false;
+                    progressForm.MinimizeBox = false;
+
+                    Label lbl = new Label
+                    {
+                        Text = "Descargando e instalando el motor autónomo de Placas xTool...\nEsto solo tomará unos segundos en la primera ejecución.",
+                        Location = new Point(20, 20),
+                        AutoSize = true,
+                        Font = new Font("Segoe UI", 9.5f)
+                    };
+                    progressForm.Controls.Add(lbl);
+
+                    ProgressBar pb = new ProgressBar
+                    {
+                        Location = new Point(20, 68),
+                        Size = new Size(385, 20),
+                        Style = ProgressBarStyle.Marquee
+                    };
+                    progressForm.Controls.Add(pb);
+
+                    bool ok = false;
+                    ThreadPool.QueueUserWorkItem(_ =>
+                    {
+                        try
+                        {
+                            using (WebClient wc = new WebClient())
+                            {
+                                wc.Headers.Add("User-Agent", "Placas-xTool-Bootstrap");
+                                wc.DownloadFile(RELEASE_INSTALLER_URL, tempSetup);
+                            }
+                            TryUnblockFile(tempSetup);
+                            if (File.Exists(tempSetup))
+                            {
+                                Process.Start(tempSetup);
+                                ok = true;
+                            }
+                        }
+                        catch { }
+                        finally
+                        {
+                            try { progressForm.Invoke((Action)(() => progressForm.Close())); } catch { }
+                        }
+                    });
+
+                    Application.Run(progressForm);
+                    return ok;
+                }
+            }
+            catch
+            {
+                return false;
             }
         }
 
@@ -297,7 +389,6 @@ namespace PlacasXToolDesktop
                         string title = sb.ToString();
                         if (title.Contains("Placas xTool"))
                         {
-                            // 1. Asignar el recurso .ico vectorial en el PropertyStore de la barra de tareas de Windows 11
                             try
                             {
                                 IPropertyStore store;
@@ -322,7 +413,6 @@ namespace PlacasXToolDesktop
                             }
                             catch { }
 
-                            // 2. Asignar HICON de 256x256 ARGB directo desde icon_256.png (sin pasar por el decodificador antiguo de System.Drawing.Icon)
                             if (hIconBig != IntPtr.Zero)
                             {
                                 SendMessage(hWnd, WM_SETICON, ICON_BIG, hIconBig);
@@ -342,13 +432,13 @@ namespace PlacasXToolDesktop
             catch { }
         }
 
-        private static bool IsPortOpen(string host, int port, int timeoutMs)
+        private static bool IsServerHttpReady(int port, int timeoutMs)
         {
             try
             {
                 using (TcpClient client = new TcpClient())
                 {
-                    IAsyncResult result = client.BeginConnect(host, port, null, null);
+                    IAsyncResult result = client.BeginConnect("127.0.0.1", port, null, null);
                     bool success = result.AsyncWaitHandle.WaitOne(TimeSpan.FromMilliseconds(timeoutMs));
                     if (!success) return false;
                     client.EndConnect(result);
@@ -361,24 +451,43 @@ namespace PlacasXToolDesktop
             }
         }
 
-        private static string FindNodeExecutable()
+        private static string FindNodeExecutable(string appDir)
         {
-            string appDir = AppDomain.CurrentDomain.BaseDirectory;
             string localNode = Path.Combine(appDir, "node.exe");
             if (File.Exists(localNode)) return localNode;
+
+            string installedNode = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "Programs", "Placas_xTool", "node.exe"
+            );
+            if (File.Exists(installedNode)) return installedNode;
 
             string[] candidates = new string[]
             {
                 Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "nodejs", "node.exe"),
-                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), "nodejs", "node.exe"),
-                "node.exe"
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), "nodejs", "node.exe")
             };
 
             foreach (string c in candidates)
             {
                 if (File.Exists(c)) return c;
             }
-            return "node.exe";
+
+            // Buscar en PATH
+            try
+            {
+                string pathEnv = Environment.GetEnvironmentVariable("PATH") ?? "";
+                foreach (string dir in pathEnv.Split(';'))
+                {
+                    string trimmed = dir.Trim();
+                    if (string.IsNullOrEmpty(trimmed)) continue;
+                    string candidate = Path.Combine(trimmed, "node.exe");
+                    if (File.Exists(candidate)) return candidate;
+                }
+            }
+            catch { }
+
+            return null;
         }
 
         private static string FindChromiumEngine()

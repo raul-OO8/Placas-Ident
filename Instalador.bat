@@ -1,24 +1,19 @@
 @echo off
 chcp 65001 >nul
-cd /d "%~dp0"
+title Instalador Placas xTool
+echo ========================================================
+echo    Instalador Oficial - Placas xTool
+echo    Zybra ^& Vorma Maschinen GmbH
+echo ========================================================
+echo.
 
-:: 1. Iniciar el servicio local silenciosamente si no está activo
-powershell.exe -NoProfile -Command "try { $c = New-Object System.Net.Sockets.TcpClient('127.0.0.1', 3456); $c.Close(); exit 0 } catch { exit 1 }"
-if %errorlevel% neq 0 (
-    start /b "" node server.js >nul 2>nul
-    timeout /t 1 /nobreak >nul
+if exist "%~dp0Instalador_Placas_xTool_Setup.exe" (
+    echo Desbloqueando e iniciando el instalador oficial...
+    powershell -NoProfile -ExecutionPolicy Bypass -Command "Unblock-File -Path '%~dp0Instalador_Placas_xTool_Setup.exe' -ErrorAction SilentlyContinue"
+    start "" "%~dp0Instalador_Placas_xTool_Setup.exe"
+    exit /b 0
 )
 
-:: 2. Buscar Chromium/Edge para abrir el instalador visual en ventana moderna de 720x640
-set "BROWSER="
-if exist "%ProgramFiles(x86)%\Microsoft\Edge\Application\msedge.exe" set "BROWSER=%ProgramFiles(x86)%\Microsoft\Edge\Application\msedge.exe"
-if not defined BROWSER if exist "%ProgramFiles%\Microsoft\Edge\Application\msedge.exe" set "BROWSER=%ProgramFiles%\Microsoft\Edge\Application\msedge.exe"
-if not defined BROWSER if exist "%ProgramFiles%\Google\Chrome\Application\chrome.exe" set "BROWSER=%ProgramFiles%\Google\Chrome\Application\chrome.exe"
-if not defined BROWSER if exist "%ProgramFiles(x86)%\Google\Chrome\Application\chrome.exe" set "BROWSER=%ProgramFiles(x86)%\Google\Chrome\Application\chrome.exe"
-
-if defined BROWSER (
-    start "" "%BROWSER%" --app="http://127.0.0.1:3456/installer.html" --window-size=720,640 --no-first-run
-) else (
-    start http://127.0.0.1:3456/installer.html
-)
+echo Descargando instalador completo con motor autonomo desde GitHub...
+powershell -NoProfile -ExecutionPolicy Bypass -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; $dest = Join-Path $env:TEMP 'Instalador_Placas_xTool_Setup.exe'; Invoke-WebRequest -Uri 'https://github.com/raul-OO8/Placas-Ident/releases/latest/download/Instalador_Placas_xTool_Setup.exe' -OutFile $dest -UseBasicParsing; Unblock-File -Path $dest -ErrorAction SilentlyContinue; Start-Process -FilePath $dest"
 exit /b 0

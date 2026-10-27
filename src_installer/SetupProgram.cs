@@ -12,15 +12,15 @@ using Microsoft.Win32;
 [assembly: AssemblyTitle("Instalador — Placas xTool")]
 [assembly: AssemblyProduct("Placas xTool")]
 [assembly: AssemblyCompany("Zybra · Vorma · Olsen & Kael")]
-[assembly: AssemblyVersion("1.2.0.0")]
-[assembly: AssemblyFileVersion("1.2.0.0")]
+[assembly: AssemblyVersion("1.2.2.0")]
+[assembly: AssemblyFileVersion("1.2.2.0")]
 
 namespace PlacasXToolInstaller
 {
     static class SetupProgram
     {
         private const string APP_NAME = "Placas xTool";
-        private const string APP_VERSION = "1.2.0";
+        private const string APP_VERSION = "1.2.2";
         private const string PUBLISHER = "Zybra · Vorma · Olsen & Kael";
 
         [STAThread]
@@ -271,6 +271,19 @@ namespace PlacasXToolInstaller
                 {
                     try { proc.Kill(); proc.WaitForExit(1500); } catch { }
                 }
+                foreach (var proc in Process.GetProcessesByName("node"))
+                {
+                    try
+                    {
+                        string modPath = proc.MainModule.FileName;
+                        if (modPath != null && modPath.StartsWith(targetDir, StringComparison.OrdinalIgnoreCase))
+                        {
+                            proc.Kill();
+                            proc.WaitForExit(1500);
+                        }
+                    }
+                    catch { }
+                }
 
                 // 2. Preservar maquinas.json si ya existía en la carpeta de destino
                 string existingDb = Path.Combine(targetDir, "data", "maquinas.json");
@@ -315,7 +328,14 @@ namespace PlacasXToolInstaller
                                 continue;
                             }
 
-                            entry.ExtractToFile(destFile, true);
+                            try
+                            {
+                                entry.ExtractToFile(destFile, true);
+                            }
+                            catch
+                            {
+                                if (!File.Exists(destFile)) throw;
+                            }
 
                             if (onProgress != null && idx % 3 == 0)
                             {

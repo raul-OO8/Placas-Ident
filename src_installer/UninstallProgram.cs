@@ -105,6 +105,18 @@ namespace PlacasXToolInstaller
                             try { p.Kill(); } catch { }
                         }
                     }
+                    foreach (var p in Process.GetProcessesByName("node"))
+                    {
+                        try
+                        {
+                            string modPath = p.MainModule.FileName;
+                            if (modPath != null && modPath.StartsWith(installDir, StringComparison.OrdinalIgnoreCase))
+                            {
+                                p.Kill();
+                            }
+                        }
+                        catch { }
+                    }
 
                     // 2. Eliminar acceso directo del Escritorio
                     string desktop = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);

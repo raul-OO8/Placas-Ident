@@ -20,13 +20,13 @@ $headers = @{
     "User-Agent" = "Placas-xTool-Deployer"
 }
 
-$tag = "v1.2.1"
-$relName = "Placas xTool v1.2.1 - Firma Digital y Bypass SmartScreen"
+$tag = "v1.2.2"
+$relName = "Placas xTool v1.2.2 - Fix Conexión Local 127.0.0.1 en Windows 10/11"
 $relNotes = @"
-Novedades de la versión 1.2.1:
-- Firma digital oficial Authenticode (Zybra & Vorma Maschinen GmbH) con sellado de tiempo DigiCert SHA-256.
-- Paquete ZIP limpio con lanzador automático sin advertencias de seguridad de Windows.
-- Optimización y verificación del sistema de actualización en 1 clic.
+Novedades de la versión 1.2.2:
+- Solución definitiva al error '127.0.0.1 rechazó la conexión (ERR_CONNECTION_REFUSED)' en equipos Windows 10/11 con Microsoft Edge Startup Boost activo.
+- Ampliación del tiempo de espera verificada de puerto (15s) para permitir el primer escaneo de Windows Defender sobre el motor local.
+- Auto-descarga e instalación automática del motor autónomo si el usuario descargó el ZIP del código fuente en lugar del instalador de Releases.
 "@
 
 # 1. Comprobar si existe la release v1.2.1, sino crearla

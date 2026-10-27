@@ -4,7 +4,7 @@
 
 **Generador y gestor de placas técnicas industriales con posicionamiento y parámetros láser automáticos para xTool Studio**
 
-[![Versión](https://img.shields.io/badge/Versión-v1.2.1-44af65?style=for-the-badge)](https://github.com/raul-OO8/Placas-Ident)
+[![Versión](https://img.shields.io/badge/Versión-v1.2.2-44af65?style=for-the-badge)](https://github.com/raul-OO8/Placas-Ident)
 [![Plataforma](https://img.shields.io/badge/Plataforma-Windows_10_%2F_11-161a18?style=for-the-badge&logo=windows)](https://github.com/raul-OO8/Placas-Ident)
 [![Láser](https://img.shields.io/badge/xTool_Studio-F1_Ultra_Ready-e7246b?style=for-the-badge)](https://github.com/raul-OO8/Placas-Ident)
 [![Marcas](https://img.shields.io/badge/Marcas-Zybra_·_Vorma_·_Olsen-dddd19?style=for-the-badge&logoColor=000)](https://github.com/raul-OO8/Placas-Ident)
@@ -31,21 +31,21 @@ Elige la opción que prefieras para instalar el programa en tu ordenador:
 
 <div align="center">
 
-[![Descargar Instalador Limpio ZIP](https://img.shields.io/badge/Opción_1_(Recomendada_Sin_Avisos)-Descargar_ZIP_con_Instalador-44af65?style=for-the-badge&logo=zip&logoColor=white)](https://github.com/raul-OO8/Placas-Ident/releases/download/v1.2.1/Placas_xTool_Instalador.zip)
+[![Descargar Instalador Limpio ZIP](https://img.shields.io/badge/Opción_1_(Recomendada_Sin_Avisos)-Descargar_ZIP_con_Instalador-44af65?style=for-the-badge&logo=zip&logoColor=white)](https://github.com/raul-OO8/Placas-Ident/releases/latest/download/Placas_xTool_Instalador.zip)
 &nbsp;&nbsp;
-[![Descargar EXE Directo](https://img.shields.io/badge/Opción_2-Instalador__Placas__xTool__Setup.exe-161a18?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/raul-OO8/Placas-Ident/releases/download/v1.2.1/Instalador_Placas_xTool_Setup.exe)
+[![Descargar EXE Directo](https://img.shields.io/badge/Opción_2-Instalador__Placas__xTool__Setup.exe-161a18?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/raul-OO8/Placas-Ident/releases/latest/download/Instalador_Placas_xTool_Setup.exe)
 
 </div>
 
 ### Opción 1: Paquete ZIP Automático (Recomendado — Cero Advertencias)
-1. Descarga [**`Placas_xTool_Instalador.zip`**](https://github.com/raul-OO8/Placas-Ident/releases/download/v1.2.1/Placas_xTool_Instalador.zip) y descomprímelo.
+1. Descarga [**`Placas_xTool_Instalador.zip`**](https://github.com/raul-OO8/Placas-Ident/releases/latest/download/Placas_xTool_Instalador.zip) y descomprímelo.
 2. Haz doble clic en **`Instalar.bat`**.
 3. Se abrirá directamente el instalador visual en pantalla sin ninguna ventana de advertencia de Windows.
 
 ---
 
 ### Opción 2: Instalador `.exe` Directo
-1. Descarga [**`Instalador_Placas_xTool_Setup.exe`**](https://github.com/raul-OO8/Placas-Ident/releases/download/v1.2.1/Instalador_Placas_xTool_Setup.exe).
+1. Descarga [**`Instalador_Placas_xTool_Setup.exe`**](https://github.com/raul-OO8/Placas-Ident/releases/latest/download/Instalador_Placas_xTool_Setup.exe).
 2. Haz doble clic para abrirlo.
 3. **¿Te sale el aviso de Windows «No se pudo comprobar el editor»?**
    - Es la protección habitual de Windows al descargar cualquier `.exe` de internet por primera vez.

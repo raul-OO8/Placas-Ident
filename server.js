@@ -374,8 +374,12 @@ const server = http.createServer(async (req, res) => {
             const destPath = path.join(ROOT_DIR, cleanRel);
             const destDir = path.dirname(destPath);
             if (!fs.existsSync(destDir)) fs.mkdirSync(destDir, { recursive: true });
-            const fileBuf = await fetchHttpsBuffer(`${rawBase}/${cleanRel}?t=${Date.now()}`, 8000);
-            fs.writeFileSync(destPath, fileBuf);
+            try {
+              const fileBuf = await fetchHttpsBuffer(`${rawBase}/${cleanRel}?t=${Date.now()}`, 8000);
+              fs.writeFileSync(destPath, fileBuf);
+            } catch (_) {
+              // Ignorar si algún ejecutable está bloqueado en memoria durante la actualización en caliente
+            }
           }
         }
 
@@ -557,6 +561,14 @@ const server = http.createServer(async (req, res) => {
       }
       res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
       res.end(JSON.stringify({ ok: true }));
+      return;
+    }
+
+    // 11. Apagado limpio del motor local (para reinstalación o desinstalación)
+    if (pathname === '/api/shutdown' && (req.method === 'POST' || req.method === 'GET')) {
+      res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify({ ok: true }));
+      setTimeout(() => process.exit(0), 100);
       return;
     }
 
