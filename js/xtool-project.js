@@ -701,11 +701,21 @@ function buildXToolProjectArchive(opts) {
 
   if (isVorma) {
     // VORMA (Acero Inoxidable 304 - materialId: 1323, thickness: 0.5)
-    // - Vorma Grande (150x90): Textos Fibra IR 60% 3000mm/s | Líneas Marcar Fibra IR 32% 500mm/s | Logo Luz azul 47% 60mm/s
-    // - Vorma Pequeña (110x70): Textos Fibra IR 30% 3000mm/s | Líneas Marcar Fibra IR 32% 500mm/s | Logo Luz azul 47% 60mm/s
+    // - Vorma Grande (150x90): Textos Fibra IR 60% 3000mm/s | Líneas Marcar Fibra IR 32% 500mm/s
+    // - Vorma Pequeña (110x70): Textos Fibra IR 30% 3000mm/s | Líneas Marcar Fibra IR 32% 500mm/s
+    // - Logo Luz azul: Verano/Normal 47% 60mm/s | Invierno/Frío 55% 140mm/s
     materialId = 1323;
     materialThickness = 0.5;
     const vormaTextPower = isVormaSmall ? 30 : 60;
+    const isWinterMode = opts.vormaBlueMode === 'winter';
+    const customBluePower = opts.blueLaserParams && Number.isFinite(Number(opts.blueLaserParams.power))
+      ? Number(opts.blueLaserParams.power)
+      : null;
+    const customBlueSpeed = opts.blueLaserParams && Number.isFinite(Number(opts.blueLaserParams.speed))
+      ? Number(opts.blueLaserParams.speed)
+      : null;
+    const vormaBluePower = customBluePower ?? (isWinterMode ? 55 : 47);
+    const vormaBlueSpeed = customBlueSpeed ?? (isWinterMode ? 140 : 60);
 
     patches = {
       'patch:Muk8gzPv3U5G': {
@@ -795,7 +805,7 @@ function buildXToolProjectArchive(opts) {
           kerfDistance: 0
         }
       },
-      // Grupo 3: Logo VORMA + Isotipo turbina -> Grabar | Luz azul (blue) | Potencia 47% | Velocidad 60 mm/s | 1 pasada
+      // Grupo 3: Logo VORMA + Isotipo turbina -> Grabar | Luz azul (blue) | Verano: 47% 60mm/s | Invierno: 55% 140mm/s
       'patch:HkevOJYDL4rr': {
         id: 'patch:HkevOJYDL4rr',
         profileId: 'profile:f4B2UcIqxoUf',
@@ -803,13 +813,13 @@ function buildXToolProjectArchive(opts) {
         overrides: {
           imageCorrection: false,
           bitmapEngraveMode: 'normal',
-          speed: 60,
+          speed: vormaBlueSpeed,
           density: 200,
           needGapNumDensity: true,
           dotDuration: 100,
           dpi: 500,
           processingLightSource: 'blue',
-          power: 47,
+          power: vormaBluePower,
           repeat: 1,
           bitmapScanMode: 'zMode',
           frequency: 30,

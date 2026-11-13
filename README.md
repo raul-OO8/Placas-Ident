@@ -4,7 +4,7 @@
 
 **Generador y gestor de placas técnicas industriales con posicionamiento y parámetros láser automáticos para xTool Studio**
 
-[![Versión](https://img.shields.io/badge/Versión-v1.2.2-44af65?style=for-the-badge)](https://github.com/raul-OO8/Placas-Ident)
+[![Versión](https://img.shields.io/badge/Versión-v1.2.3-44af65?style=for-the-badge)](https://github.com/raul-OO8/Placas-Ident)
 [![Plataforma](https://img.shields.io/badge/Plataforma-Windows_10_%2F_11-161a18?style=for-the-badge&logo=windows)](https://github.com/raul-OO8/Placas-Ident)
 [![Láser](https://img.shields.io/badge/xTool_Studio-F1_Ultra_Ready-e7246b?style=for-the-badge)](https://github.com/raul-OO8/Placas-Ident)
 [![Marcas](https://img.shields.io/badge/Marcas-Zybra_·_Vorma_·_Olsen-dddd19?style=for-the-badge&logoColor=000)](https://github.com/raul-OO8/Placas-Ident)

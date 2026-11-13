@@ -26,6 +26,10 @@ const AppState = {
     exportCropMode: 'full_plate', // 'full_plate' (150x90 / 110x70mm) o 'inner_artbox' (recortado al área interior)
     zybraKnockoutMode: 'compound', // 'compound' (trazado compuesto vaciado para xTool) o 'layered' (rect negro + texto blanco)
     lockInnerBoundingBox: false,
+    vormaBlueMode: 'auto', // 'auto' | 'summer' | 'winter'
+    vormaTempThreshold: 15, // °C por debajo del cual se activa modo Invierno/Frío (55% / 140 mm/s)
+    vormaCurrentTempC: null,
+    vormaTempCity: '',
     templateConfigs: {}
   },
   exportHistory: [],
@@ -123,7 +127,19 @@ const UserInvalidFallback = (() => {
 // CARGA Y PERSISTENCIA DE DATOS
 // ============================================================================
 async function loadAppData() {
-  // 1. Cargar ajustes
+  // 1. Cargar ajustes (primero desde servidor local si existe, y fusionar con localStorage)
+  if (location.protocol.startsWith('http')) {
+    try {
+      const sRes = await fetch('/api/settings');
+      if (sRes.ok) {
+        const sData = await sRes.json();
+        if (sData && typeof sData === 'object' && Object.keys(sData).length > 0) {
+          AppState.settings = { ...AppState.settings, ...sData };
+        }
+      }
+    } catch (_) {}
+  }
+
   try {
     const savedSettings = localStorage.getItem(STORAGE_KEY_SETTINGS);
     if (savedSettings) {
@@ -144,6 +160,7 @@ async function loadAppData() {
 
   // 3. Intentar cargar desde servidor local si está activo, o desde localStorage, o usar INITIAL_MACHINES
   let loadedMachines = null;
+  let serverHasMachines = false;
   if (location.protocol.startsWith('http')) {
     try {
       const res = await fetch('/api/machines');
@@ -151,6 +168,7 @@ async function loadAppData() {
         const data = await res.json();
         if (Array.isArray(data) && data.length > 0) {
           loadedMachines = data;
+          serverHasMachines = true;
         }
       }
     } catch (_) {}
@@ -175,7 +193,7 @@ async function loadAppData() {
   }
 
   AppState.machines = loadedMachines;
-  saveMachinesToStorage(false);
+  saveMachinesToStorage(!serverHasMachines);
 
   if (AppState.machines.length > 0) {
     // Seleccionar por defecto la BC40 de Vorma Grande o la primera máquina
@@ -202,10 +220,119 @@ async function saveMachinesToStorage(syncServer = true) {
   }
 }
 
-function saveSettingsToStorage() {
+async function saveSettingsToStorage(syncServer = true) {
   try {
     localStorage.setItem(STORAGE_KEY_SETTINGS, JSON.stringify(AppState.settings));
   } catch (e) {}
+
+  if (syncServer && location.protocol.startsWith('http')) {
+    try {
+      await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(AppState.settings)
+      });
+    } catch (_) {}
+  }
+}
+
+function getEffectiveVormaBlueState() {
+  const mode = AppState.settings.vormaBlueMode || 'auto';
+  const threshold = Number.isFinite(Number(AppState.settings.vormaTempThreshold))
+    ? Number(AppState.settings.vormaTempThreshold)
+    : 15;
+  const tempC = AppState.settings.vormaCurrentTempC;
+
+  let resolvedSeason = 'summer';
+  let reason = 'Verano / Normal';
+
+  if (mode === 'winter') {
+    resolvedSeason = 'winter';
+    reason = 'Invierno / Frío (Manual)';
+  } else if (mode === 'summer') {
+    resolvedSeason = 'summer';
+    reason = 'Verano / Normal (Manual)';
+  } else {
+    if (tempC !== null && tempC !== '' && Number.isFinite(Number(tempC))) {
+      const t = Number(tempC);
+      resolvedSeason = t < threshold ? 'winter' : 'summer';
+      reason = resolvedSeason === 'winter'
+        ? `Auto (${t}°C < ${threshold}°C)`
+        : `Auto (${t}°C ≥ ${threshold}°C)`;
+    } else {
+      const month = new Date().getMonth() + 1; // 1-12
+      const isColdMonth = month >= 11 || month <= 3;
+      resolvedSeason = isColdMonth ? 'winter' : 'summer';
+      reason = isColdMonth ? 'Auto (Temporada fría)' : 'Auto (Temporada templada)';
+    }
+  }
+
+  return {
+    mode,
+    season: resolvedSeason,
+    power: resolvedSeason === 'winter' ? 55 : 47,
+    speed: resolvedSeason === 'winter' ? 140 : 60,
+    reason
+  };
+}
+
+function renderVormaLaserTempBar(machine) {
+  const bar = document.getElementById('vormaLaserTempBar');
+  if (!bar) return;
+
+  const isVorma = machine && (machine.brand === 'vorma' || String(machine.templateId || '').startsWith('vorma_'));
+  bar.hidden = !isVorma;
+  if (!isVorma) return;
+
+  const state = getEffectiveVormaBlueState();
+  const badge = document.getElementById('vormaActiveLaserBadge');
+  if (badge) {
+    badge.textContent = `${state.power}% · ${state.speed} mm/s — ${state.reason}`;
+    badge.className = `vorma-laser-badge ${state.season === 'winter' ? 'is-winter' : 'is-summer'}`;
+  }
+
+  bar.querySelectorAll('[data-vorma-mode]').forEach((btn) => {
+    btn.classList.toggle('active', btn.getAttribute('data-vorma-mode') === state.mode);
+  });
+
+  const tempInput = document.getElementById('vormaTempInput');
+  if (tempInput && document.activeElement !== tempInput) {
+    tempInput.value = (AppState.settings.vormaCurrentTempC !== null && AppState.settings.vormaCurrentTempC !== undefined)
+      ? AppState.settings.vormaCurrentTempC
+      : '';
+  }
+}
+
+function setVormaBlueMode(mode) {
+  AppState.settings.vormaBlueMode = ['auto', 'summer', 'winter'].includes(mode) ? mode : 'auto';
+  saveSettingsToStorage();
+  renderVormaLaserTempBar(getSelectedMachine());
+  const state = getEffectiveVormaBlueState();
+  showToastNotification(`Luz azul Vorma: ${state.power}% potencia · ${state.speed} mm/s (${state.reason})`, 'info');
+}
+
+async function refreshWeatherTemp(manual = false) {
+  if (!location.protocol.startsWith('http')) return;
+  try {
+    const res = await fetch('/api/weather-temp');
+    if (!res.ok) return;
+    const data = await res.json();
+    if (data && data.ok && Number.isFinite(Number(data.tempC))) {
+      AppState.settings.vormaCurrentTempC = Math.round(Number(data.tempC));
+      AppState.settings.vormaTempCity = data.city || '';
+      saveSettingsToStorage();
+      renderVormaLaserTempBar(getSelectedMachine());
+      if (manual) {
+        const state = getEffectiveVormaBlueState();
+        const cityTxt = data.city ? ` en ${data.city}` : '';
+        showToastNotification(`Temperatura actual${cityTxt}: ${AppState.settings.vormaCurrentTempC}°C → ${state.power}% · ${state.speed} mm/s`, 'info');
+      }
+      return;
+    }
+  } catch (_) {}
+  if (manual) {
+    showToastNotification('No se pudo detectar la temperatura online. Puedes escribirla manualmente.', 'info');
+  }
 }
 
 function getEffectiveTemplateConfig(templateId) {
@@ -394,6 +521,9 @@ function updateOperatorStation() {
   const filename = buildExportFilename(machine, AppState.operatorSerial, tpl);
   const fnEl = document.getElementById('exportFilenamePreview');
   if (fnEl) fnEl.textContent = filename;
+
+  // Barra de temperatura / Luz Azul para Vorma
+  renderVormaLaserTempBar(machine);
 
   // Renderizar SVG en vivo y Reglas Milimétricas xTool
   renderLivePreviewSVG(machine, tpl);
@@ -658,6 +788,7 @@ async function exportAndOpenInXTool() {
   const data = prepareCurrentMachineExportData();
   if (!data) return;
   const { machine, tpl, svgContent, filename } = data;
+  const vormaBlueState = getEffectiveVormaBlueState();
 
   if (location.protocol.startsWith('http')) {
     try {
@@ -671,7 +802,9 @@ async function exportAndOpenInXTool() {
           xToolY: tpl.xToolY,
           filename,
           svgContent,
-          revealInExplorer: true
+          revealInExplorer: true,
+          vormaBlueMode: vormaBlueState.season,
+          blueLaserParams: { power: vormaBlueState.power, speed: vormaBlueState.speed }
         })
       });
       if (res.ok) {
@@ -699,6 +832,7 @@ async function exportFinalSVGForXTool() {
   const data = prepareCurrentMachineExportData();
   if (!data) return;
   const { machine, tpl, svgContent, filename } = data;
+  const vormaBlueState = getEffectiveVormaBlueState();
 
   let savedPathOnDisk = null;
   if (location.protocol.startsWith('http')) {
@@ -713,7 +847,9 @@ async function exportFinalSVGForXTool() {
           xToolY: tpl.xToolY,
           filename,
           svgContent,
-          revealInExplorer: true
+          revealInExplorer: true,
+          vormaBlueMode: vormaBlueState.season,
+          blueLaserParams: { power: vormaBlueState.power, speed: vormaBlueState.speed }
         })
       });
       if (res.ok) {
@@ -750,6 +886,7 @@ async function saveSVGWithNativeDialog() {
   const data = prepareCurrentMachineExportData();
   if (!data) return;
   const { machine, tpl, svgContent, filename } = data;
+  const vormaBlueState = getEffectiveVormaBlueState();
 
   if (location.protocol.startsWith('http')) {
     try {
@@ -763,7 +900,9 @@ async function saveSVGWithNativeDialog() {
           xToolX: tpl.xToolX,
           xToolY: tpl.xToolY,
           filename,
-          svgContent
+          svgContent,
+          vormaBlueMode: vormaBlueState.season,
+          blueLaserParams: { power: vormaBlueState.power, speed: vormaBlueState.speed }
         })
       });
       if (res.ok) {
@@ -978,16 +1117,41 @@ function syncModalTemplateLabelsAndSlots(resetSlotsToTemplateDefault = false) {
   }
 
   if (resetSlotsToTemplateDefault) {
-    // Conservar valores existentes por etiqueta o por posición cuando sea posible
-    const prevSlots = m.slots || [];
-    m.slots = JSON.parse(JSON.stringify(tpl.defaultSlots)).map((defSlot, idx) => {
-      const sameLabel = prevSlots.find(p => p.label && p.label.toLowerCase() === defSlot.label.toLowerCase());
-      const samePos = prevSlots[idx];
-      return {
+    // Conservar todos los valores y parámetros personalizados del diseño al cambiar a otra plantilla
+    const prevSlots = Array.isArray(m.slots) ? m.slots : [];
+    const hasMeaningfulPrev = prevSlots.some(s => (s.value && String(s.value).trim() !== '') || (s.label && String(s.label).trim() !== ''));
+    if (!hasMeaningfulPrev) {
+      m.slots = JSON.parse(JSON.stringify(tpl.defaultSlots)).map(defSlot => ({
         ...defSlot,
-        value: sameLabel ? sameLabel.value : (samePos && samePos.value ? samePos.value : (defSlot.defaultVal || ''))
-      };
-    });
+        value: defSlot.defaultVal || ''
+      }));
+    } else {
+      const usedPrev = new Set();
+      const mergedSlots = JSON.parse(JSON.stringify(tpl.defaultSlots)).map((defSlot, idx) => {
+        const sameLabelIdx = prevSlots.findIndex((p, pIdx) => !usedPrev.has(pIdx) && p.label && p.label.toLowerCase() === defSlot.label.toLowerCase());
+        const matchIdx = sameLabelIdx !== -1 ? sameLabelIdx : (!usedPrev.has(idx) && prevSlots[idx] ? idx : -1);
+        if (matchIdx !== -1) {
+          usedPrev.add(matchIdx);
+          return {
+            ...defSlot,
+            label: prevSlots[matchIdx].label || defSlot.label,
+            value: prevSlots[matchIdx].value !== undefined ? prevSlots[matchIdx].value : (defSlot.defaultVal || ''),
+            enabled: prevSlots[matchIdx].enabled !== false
+          };
+        }
+        return {
+          ...defSlot,
+          value: defSlot.defaultVal || ''
+        };
+      });
+      // Añadir cualquier parámetro extra personalizado que el usuario tuviera guardado
+      prevSlots.forEach((p, pIdx) => {
+        if (!usedPrev.has(pIdx) && ((p.label && p.label.trim()) || (p.value && p.value.trim()))) {
+          mergedSlots.push({ ...p });
+        }
+      });
+      m.slots = mergedSlots;
+    }
   }
 
   renderModalPresetButtons(tplId);
@@ -1328,6 +1492,12 @@ function openCalibrationModal() {
   document.getElementById('settingExportCropMode').value = AppState.settings.exportCropMode || 'full_plate';
   document.getElementById('settingZybraKnockoutMode').value = AppState.settings.zybraKnockoutMode || 'compound';
   document.getElementById('settingLockInnerBounds').checked = !!AppState.settings.lockInnerBoundingBox;
+  const threshEl = document.getElementById('settingVormaTempThreshold');
+  if (threshEl) {
+    threshEl.value = Number.isFinite(Number(AppState.settings.vormaTempThreshold))
+      ? AppState.settings.vormaTempThreshold
+      : 15;
+  }
 
   const tbody = document.getElementById('calibrationTableBody');
   const keys = ['zybra_unica', 'vorma_grande', 'vorma_pequena', 'olsen_grande', 'olsen_pequena'];
@@ -1362,6 +1532,11 @@ function saveCalibrationSettings(event) {
   AppState.settings.exportCropMode = document.getElementById('settingExportCropMode').value;
   AppState.settings.zybraKnockoutMode = document.getElementById('settingZybraKnockoutMode').value;
   AppState.settings.lockInnerBoundingBox = document.getElementById('settingLockInnerBounds').checked;
+  const threshEl = document.getElementById('settingVormaTempThreshold');
+  if (threshEl) {
+    const parsedThresh = parseFloat(threshEl.value);
+    AppState.settings.vormaTempThreshold = Number.isFinite(parsedThresh) ? parsedThresh : 15;
+  }
 
   const rows = document.querySelectorAll('#calibrationTableBody tr[data-tpl-key]');
   if (!AppState.settings.templateConfigs) AppState.settings.templateConfigs = {};
@@ -1393,6 +1568,7 @@ function resetCalibrationDefaults() {
   AppState.settings.exportCropMode = 'full_plate';
   AppState.settings.zybraKnockoutMode = 'compound';
   AppState.settings.lockInnerBoundingBox = false;
+  AppState.settings.vormaTempThreshold = 15;
   AppState.settings.templateConfigs = {};
   saveSettingsToStorage();
   openCalibrationModal();
@@ -1620,6 +1796,8 @@ window.AppActions = {
   resetCalibrationDefaults,
   exportDatabaseJSON,
   copyTextToClipboard,
+  setVormaBlueMode,
+  refreshWeatherTemp,
   checkForUpdates,
   openUpdateModal,
   performOneClickUpdate
@@ -1726,7 +1904,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
+  // Controles de temperatura Vorma
+  const vormaTempInput = document.getElementById('vormaTempInput');
+  if (vormaTempInput) {
+    vormaTempInput.addEventListener('input', (e) => {
+      const val = e.target.value.trim();
+      AppState.settings.vormaCurrentTempC = val === '' ? null : parseFloat(val);
+      AppState.settings.vormaBlueMode = 'auto';
+      saveSettingsToStorage();
+      renderVormaLaserTempBar(getSelectedMachine());
+    });
+  }
+
   await loadAppData();
+  refreshWeatherTemp(false);
   renderExportHistory();
   if (location.hash === '#cama') setCanvasViewMode('bed');
 });

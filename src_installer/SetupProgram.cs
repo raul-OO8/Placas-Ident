@@ -12,15 +12,15 @@ using Microsoft.Win32;
 [assembly: AssemblyTitle("Instalador — Placas xTool")]
 [assembly: AssemblyProduct("Placas xTool")]
 [assembly: AssemblyCompany("Zybra · Vorma · Olsen & Kael")]
-[assembly: AssemblyVersion("1.2.2.0")]
-[assembly: AssemblyFileVersion("1.2.2.0")]
+[assembly: AssemblyVersion("1.2.3.0")]
+[assembly: AssemblyFileVersion("1.2.3.0")]
 
 namespace PlacasXToolInstaller
 {
     static class SetupProgram
     {
         private const string APP_NAME = "Placas xTool";
-        private const string APP_VERSION = "1.2.2";
+        private const string APP_VERSION = "1.2.3";
         private const string PUBLISHER = "Zybra · Vorma · Olsen & Kael";
 
         [STAThread]

@@ -737,7 +737,6 @@ function generatePlateSVG(machine, runtimeOverrides = {}, options = {}) {
     dynamicPaths.push(textToPathElement('CorporateA-Italic', primaryModel, 189.47, 66.32, 24, { maxWidth: 218 }));
 
     dynamicPaths.push(textToPathElement('CorporateA-Regular', 'zybra.de.com / support@zybra.de.com', 134.19, 95.31, 7));
-    dynamicPaths.push(textToPathElement('CorporateA-Regular', 'Made in Germany', 301.08, 229.50, 7));
 
     // Serial number arriba a la derecha
     dynamicPaths.push(textToPathElement('CorporateA-Regular', 'Serial number:', 301.08, 95.31, 7));
@@ -807,13 +806,12 @@ function generatePlateSVG(machine, runtimeOverrides = {}, options = {}) {
       dynamicPaths.push(textToPathElement('UniversLTStd-Cn', primaryName, 269.66, 44.49, mainFontSize, { maxWidth: 136 }));
 
       // Datos fijos empresa izquierda
-      dynamicPaths.push(textToPathElement('UniversLTStd-Cn', 'Vorma Maschinen GmbH', 18.60, 107.08, mainFontSize));
+      dynamicPaths.push(textToPathElement('UniversLTStd-Cn', 'Vorma Maschinen', 18.60, 107.08, mainFontSize));
       dynamicPaths.push(textToPathElement('UniversLTStd-Cn', 'www.vormasmachinen.com', 18.60, 123.93, mainFontSize));
-      dynamicPaths.push(textToPathElement('UniversLTStd-Cn', 'Made in Germany', 18.60, 141.81, mainFontSize));
 
-      // Año de fabricación debajo de Made in Germany (ej. 2026 en página 2 del PDF)
+      // Año de fabricación debajo de la web
       if (manufactureDate) {
-        dynamicPaths.push(textToPathElement('UniversLTStd-Cn', manufactureDate, 18.71, 160.35, mainFontSize));
+        dynamicPaths.push(textToPathElement('UniversLTStd-Cn', manufactureDate, 18.71, 141.81, mainFontSize));
       }
 
       // Serial Number abajo a la izquierda
@@ -829,12 +827,11 @@ function generatePlateSVG(machine, runtimeOverrides = {}, options = {}) {
       dynamicPaths.push(textToPathElement('UniversLTStd-Cn', 'Machine:', 219.57, 23.41, mainFontSize));
       dynamicPaths.push(textToPathElement('UniversLTStd-Cn', primaryName, 219.57, 34.61, mainFontSize, { maxWidth: 85 }));
 
-      dynamicPaths.push(textToPathElement('UniversLTStd-Cn', 'Vorma Maschinen GmbH', 23.98, 79.97, mainFontSize));
+      dynamicPaths.push(textToPathElement('UniversLTStd-Cn', 'Vorma Maschinen', 23.98, 79.97, mainFontSize));
       dynamicPaths.push(textToPathElement('UniversLTStd-Cn', 'www.vormasmachinen.com', 23.98, 95.87, mainFontSize));
-      dynamicPaths.push(textToPathElement('UniversLTStd-Cn', 'Made in Germany', 23.98, 111.16, mainFontSize));
 
       if (manufactureDate) {
-        dynamicPaths.push(textToPathElement('UniversLTStd-Cn', manufactureDate, 23.98, 126.45, mainFontSize));
+        dynamicPaths.push(textToPathElement('UniversLTStd-Cn', manufactureDate, 23.98, 111.16, mainFontSize));
       }
 
       dynamicPaths.push(textToPathElement('UniversLTStd-Cn', 'Serial Number:', 47.19, 173.11, mainFontSize));

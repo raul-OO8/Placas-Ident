@@ -15,8 +15,8 @@ using System.Windows.Forms;
 [assembly: AssemblyDescription("Generador de Placas Técnicas para xTool Studio")]
 [assembly: AssemblyCompany("Zybra · Vorma · Olsen & Kael")]
 [assembly: AssemblyProduct("Placas xTool")]
-[assembly: AssemblyVersion("1.2.2.0")]
-[assembly: AssemblyFileVersion("1.2.2.0")]
+[assembly: AssemblyVersion("1.2.3.0")]
+[assembly: AssemblyFileVersion("1.2.3.0")]
 
 namespace PlacasXToolDesktop
 {

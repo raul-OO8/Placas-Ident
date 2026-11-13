@@ -15,7 +15,7 @@
     <div class="header-brand">
       <img src="app-icon.svg" alt="" class="header-logo" width="34" height="34" />
       <h1>Placas xTool</h1>
-      <span id="appVersionBadge" class="version-badge" title="Versión instalada">v1.2.2</span>
+      <span id="appVersionBadge" class="version-badge" title="Versión instalada">v1.2.3</span>
     </div>
     <div class="header-actions">
       <button type="button" id="btnUpdateNotice" class="btn btn-update-pill" hidden style="display:none;" onclick="window.AppActions.openUpdateModal()">
@@ -146,6 +146,27 @@
               <div id="xtoolCanvasViewport" class="svg-stage-wrapper">
                 <div id="svgPreviewContainer" class="svg-plate-frame"></div>
                 <div id="xtoolBedSimulationContainer" class="xtool-bed-simulation" hidden></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Control de temperatura y parámetros Luz Azul para Vorma -->
+          <div id="vormaLaserTempBar" class="vorma-laser-bar" hidden>
+            <div class="vorma-laser-info">
+              <span class="vorma-laser-title">Luz azul Vorma (Logo):</span>
+              <span id="vormaActiveLaserBadge" class="vorma-laser-badge">47% · 60 mm/s</span>
+            </div>
+            <div class="vorma-laser-controls">
+              <div class="vorma-mode-group" role="group" aria-label="Modo de temperatura Vorma">
+                <button type="button" class="vorma-mode-btn active" data-vorma-mode="auto" onclick="window.AppActions.setVormaBlueMode('auto')">Auto (Tª)</button>
+                <button type="button" class="vorma-mode-btn" data-vorma-mode="summer" onclick="window.AppActions.setVormaBlueMode('summer')">☀️ Verano (47% · 60)</button>
+                <button type="button" class="vorma-mode-btn" data-vorma-mode="winter" onclick="window.AppActions.setVormaBlueMode('winter')">❄️ Invierno (55% · 140)</button>
+              </div>
+              <div class="vorma-temp-box" title="Temperatura actual (°C) usada en modo Auto">
+                <label for="vormaTempInput">Tª:</label>
+                <input type="number" id="vormaTempInput" class="vorma-temp-input" step="1" min="-20" max="55" placeholder="--" />
+                <span class="vorma-temp-unit">°C</span>
+                <button type="button" class="btn-temp-refresh" onclick="window.AppActions.refreshWeatherTemp(true)" title="Detectar temperatura actual">↻</button>
               </div>
             </div>
           </div>
@@ -285,6 +306,10 @@
               <option value="compound">Vaciado (recomendado)</option>
               <option value="layered">Capas separadas</option>
             </select>
+          </div>
+          <div class="form-field">
+            <label for="settingVormaTempThreshold">Umbral frío Vorma (°C para Invierno 55% / 140 mm/s)</label>
+            <input type="number" id="settingVormaTempThreshold" step="1" min="-10" max="35" value="15" />
           </div>
         </div>
         <label class="check-row">

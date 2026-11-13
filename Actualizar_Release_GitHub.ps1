@@ -1,4 +1,4 @@
-# Actualizar_Release_GitHub.ps1
+﻿# Actualizar_Release_GitHub.ps1
 $ErrorActionPreference = "Stop"
 
 $inputStr = "protocol=https`nhost=github.com`n`n"
@@ -20,13 +20,14 @@ $headers = @{
     "User-Agent" = "Placas-xTool-Deployer"
 }
 
-$tag = "v1.2.2"
-$relName = "Placas xTool v1.2.2 - Fix Conexión Local 127.0.0.1 en Windows 10/11"
+$tag = "v1.2.3"
+$relName = "Placas xTool v1.2.3 - Sin Made in Germany / GmbH y Modo Invierno Vorma"
 $relNotes = @"
-Novedades de la versión 1.2.2:
-- Solución definitiva al error '127.0.0.1 rechazó la conexión (ERR_CONNECTION_REFUSED)' en equipos Windows 10/11 con Microsoft Edge Startup Boost activo.
-- Ampliación del tiempo de espera verificada de puerto (15s) para permitir el primer escaneo de Windows Defender sobre el motor local.
-- Auto-descarga e instalación automática del motor autónomo si el usuario descargó el ZIP del código fuente en lugar del instalador de Releases.
+Novedades de la versión 1.2.3:
+- Eliminado 'Made in Germany' de todas las placas.
+- Eliminado el denominador 'GmbH' en las placas de Vorma.
+- Preservación completa de datos y parámetros personalizados al modificar o cambiar plantillas de diseño.
+- Nuevo selector de temperatura/estación para la luz azul de Vorma: Verano/Normal (47% potencia · 60 mm/s) e Invierno/Frío (55% potencia · 140 mm/s), con detección automática de temperatura ambiente y ajuste manual.
 "@
 
 # 1. Comprobar si existe la release v1.2.1, sino crearla

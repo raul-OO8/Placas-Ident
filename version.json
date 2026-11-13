@@ -1,8 +1,8 @@
 {
-  "version": "1.2.2",
-  "releasedAt": "2026-10-27",
+  "version": "1.2.3",
+  "releasedAt": "2026-11-13",
   "repo": "raul-OO8/Placas-Ident",
-  "notes": "Versión 1.2.2: Persistencia del motor local frente al cierre anticipado de procesos en Microsoft Edge (Startup Boost en Windows 10/11), espera verificada de puerto contra escaneos de Windows Defender y auto-descarga del motor si se ejecuta desde el ZIP de código fuente.",
+  "notes": "Versión 1.2.3: Eliminado 'Made in Germany' y 'GmbH' de las placas, mejora de persistencia de diseños y parámetros al cambiar de plantilla, y ajuste automático/manual de luz azul en Vorma según temperatura (Verano 47% / 60 mm/s, Invierno/Frío 55% / 140 mm/s).",
   "files": [
     "version.json",
     "index.html",

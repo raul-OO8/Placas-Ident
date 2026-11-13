@@ -21,6 +21,7 @@ const PORT = 3456;
 const ROOT_DIR = __dirname;
 const DATA_DIR = path.join(ROOT_DIR, 'data');
 const DB_FILE = path.join(DATA_DIR, 'maquinas.json');
+const SETTINGS_FILE = path.join(DATA_DIR, 'settings.json');
 const EXPORTS_DIR = path.join(ROOT_DIR, 'Exportados_xTool');
 const VERSION_FILE = path.join(ROOT_DIR, 'version.json');
 const DEFAULT_GITHUB_REPO = 'raul-OO8/Placas-Ident';
@@ -139,7 +140,7 @@ function fetchHttpsBuffer(url, timeoutMs = 8000) {
  * Guarda únicamente el proyecto nativo .XCS de xTool Studio (con parámetros láser y coordenadas X/Y)
  * en la subcarpeta de la marca correspondiente: Exportados_xTool/<Marca>/
  */
-function savePlateFilesToExportsFolder({ brand, templateId, xToolX, xToolY, filename, svgContent }) {
+function savePlateFilesToExportsFolder({ brand, templateId, xToolX, xToolY, filename, svgContent, vormaBlueMode, blueLaserParams }) {
   const safeBrand = String(brand || 'General').replace(/[\\/:*?"<>|]+/g, '_').trim() || 'General';
   const baseName = path.basename(String(filename || 'placa.xcs')).replace(/\.(svg|xcs)$/i, '');
   const brandFolder = path.join(EXPORTS_DIR, safeBrand);
@@ -160,7 +161,9 @@ function savePlateFilesToExportsFolder({ brand, templateId, xToolX, xToolY, file
       templateId: templateId || 'vorma_grande',
       xToolX: xToolX ?? '51',
       xToolY: xToolY ?? '51',
-      projectName: baseName
+      projectName: baseName,
+      vormaBlueMode,
+      blueLaserParams
     });
     fs.writeFileSync(targetXcsPath, xcsBuffer);
   } catch (err) {
@@ -434,17 +437,63 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
+    // 5.1 Obtener y guardar ajustes locales en disco (data/settings.json)
+    if (pathname === '/api/settings' && req.method === 'GET') {
+      if (fs.existsSync(SETTINGS_FILE)) {
+        const raw = fs.readFileSync(SETTINGS_FILE, 'utf8');
+        res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+        res.end(raw);
+      } else {
+        res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+        res.end('{}');
+      }
+      return;
+    }
+
+    if (pathname === '/api/settings' && req.method === 'POST') {
+      const body = await readBody(req);
+      const parsed = JSON.parse(body);
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+        fs.writeFileSync(SETTINGS_FILE, JSON.stringify(parsed, null, 2), 'utf8');
+      }
+      res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify({ ok: true }));
+      return;
+    }
+
+    // 5.2 Obtener temperatura ambiente actual para ajuste automático de luz azul Vorma
+    if (pathname === '/api/weather-temp' && req.method === 'GET') {
+      try {
+        const rawWeather = await fetchHttpsText('https://wttr.in/?format=j1', 3500);
+        const wJson = JSON.parse(rawWeather);
+        const cur = wJson && Array.isArray(wJson.current_condition) ? wJson.current_condition[0] : null;
+        const area = wJson && Array.isArray(wJson.nearest_area) ? wJson.nearest_area[0] : null;
+        const tempC = cur && cur.temp_C !== undefined ? parseFloat(cur.temp_C) : NaN;
+        const city = area && Array.isArray(area.areaName) && area.areaName[0] ? area.areaName[0].value : '';
+        if (Number.isFinite(tempC)) {
+          res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+          res.end(JSON.stringify({ ok: true, tempC, city }));
+          return;
+        }
+      } catch (_) {}
+      res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify({ ok: false }));
+      return;
+    }
+
     // 6. Exportar Placa (.XCS con parámetros láser + .SVG) en Exportados_xTool/<Marca>/ y mostrar en carpeta
     if ((pathname === '/api/export-svg' || pathname === '/api/open-in-xtool') && req.method === 'POST') {
       const body = await readBody(req);
-      const { brand, templateId, xToolX, xToolY, filename, svgContent, revealInExplorer } = JSON.parse(body);
+      const { brand, templateId, xToolX, xToolY, filename, svgContent, revealInExplorer, vormaBlueMode, blueLaserParams } = JSON.parse(body);
       const { targetPath, xcsPath, brandFolder } = savePlateFilesToExportsFolder({
         brand,
         templateId,
         xToolX,
         xToolY,
         filename,
-        svgContent
+        svgContent,
+        vormaBlueMode,
+        blueLaserParams
       });
 
       if (revealInExplorer !== false) {
@@ -464,14 +513,16 @@ const server = http.createServer(async (req, res) => {
     // 7. Guardar Placa mediante diálogo nativo de Windows ("Guardar como...")
     if (pathname === '/api/save-svg-dialog' && req.method === 'POST') {
       const body = await readBody(req);
-      const { brand, templateId, xToolX, xToolY, filename, svgContent } = JSON.parse(body);
+      const { brand, templateId, xToolX, xToolY, filename, svgContent, vormaBlueMode, blueLaserParams } = JSON.parse(body);
       const { targetPath: autoPath, xcsPath: autoXcsPath, brandFolder } = savePlateFilesToExportsFolder({
         brand,
         templateId,
         xToolX,
         xToolY,
         filename,
-        svgContent
+        svgContent,
+        vormaBlueMode,
+        blueLaserParams
       });
 
       const chosenPath = await openNativeSaveDialog(filename, brandFolder);
