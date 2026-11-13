@@ -44,7 +44,8 @@ try {
         draft = $false
         prerelease = $false
     } | ConvertTo-Json
-    $rel = Invoke-RestMethod -Uri "https://api.github.com/repos/raul-OO8/Placas-Ident/releases" -Method Post -Headers $headers -Body $createBody
+    $createBytes = [System.Text.Encoding]::UTF8.GetBytes($createBody)
+    $rel = Invoke-RestMethod -Uri "https://api.github.com/repos/raul-OO8/Placas-Ident/releases" -Method Post -Headers $headers -ContentType "application/json; charset=utf-8" -Body $createBytes
     Write-Host "Release $tag creada con exito (ID: $($rel.id))" -ForegroundColor Green
 }
 
