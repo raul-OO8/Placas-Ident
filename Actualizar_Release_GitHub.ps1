@@ -20,14 +20,12 @@ $headers = @{
     "User-Agent" = "Placas-xTool-Deployer"
 }
 
-$tag = "v1.2.3"
-$relName = "Placas xTool v1.2.3 - Sin Made in Germany / GmbH y Modo Invierno Vorma"
+$tag = "v1.2.4"
+$relName = "Placas xTool v1.2.4 - Autoajuste de textos largos sin solapamiento"
 $relNotes = @"
-Novedades de la versión 1.2.3:
-- Eliminado 'Made in Germany' de todas las placas.
-- Eliminado el denominador 'GmbH' en las placas de Vorma.
-- Preservación completa de datos y parámetros personalizados al modificar o cambiar plantillas de diseño.
-- Nuevo selector de temperatura/estación para la luz azul de Vorma: Verano/Normal (47% potencia · 60 mm/s) e Invierno/Frío (55% potencia · 140 mm/s), con detección automática de temperatura ambiente y ajuste manual.
+Novedades de la versión 1.2.4:
+- Ajuste automático del tamaño de letra en títulos, nombres, modelos, números de serie y parámetros técnicos largos en todas las plantillas (Zybra, Vorma y Olsen & Kael) para evitar que los textos se monten unos sobre otros.
+- Corrección de anchos máximos entre columnas y campos adyacentes en Vorma y Olsen & Kael.
 "@
 
 # 1. Comprobar si existe la release v1.2.1, sino crearla
