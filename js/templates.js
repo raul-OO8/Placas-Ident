@@ -576,10 +576,11 @@ function textToPathElement(fontKey, text, x, y, fontSize, options = {}) {
   }
 
   let actualSize = fontSize;
+  const minFontSize = options.minFontSize ?? 0.5;
   if (options.maxWidth) {
     const rawW = font.getAdvanceWidth(str, actualSize, { kerning: true });
     if (rawW > options.maxWidth && rawW > 0) {
-      actualSize = Math.max(5.5, actualSize * (options.maxWidth / rawW));
+      actualSize = Math.max(minFontSize, actualSize * (options.maxWidth / rawW));
     }
   }
 
@@ -606,10 +607,11 @@ function textToPathD(fontKey, text, x, y, fontSize, options = {}) {
   if (!font) return '';
 
   let actualSize = fontSize;
+  const minFontSize = options.minFontSize ?? 0.5;
   if (options.maxWidth) {
     const rawW = font.getAdvanceWidth(str, actualSize, { kerning: true });
     if (rawW > options.maxWidth && rawW > 0) {
-      actualSize = Math.max(5.5, actualSize * (options.maxWidth / rawW));
+      actualSize = Math.max(minFontSize, actualSize * (options.maxWidth / rawW));
     }
   }
 
@@ -628,7 +630,7 @@ function textToPathD(fontKey, text, x, y, fontSize, options = {}) {
  * Reproduce exactamente el estilo del PDF página 2 donde números van a 12pt (9.33pt en pequeña)
  * y las unidades (HZ, KG, KW, L, R/M, rpm, 1-, 2-) van a 9pt (7pt en pequeña) en la misma línea base.
  */
-function renderVormaValuePaths(text, x, y, mainSize, smallSize) {
+function renderVormaValuePaths(text, x, y, mainSize, smallSize, maxW = 104) {
   const str = String(text ?? '').trim();
   if (!str) return '';
   const font = LoadedFonts['UniversLTStd-Cn'];
@@ -658,8 +660,8 @@ function renderVormaValuePaths(text, x, y, mainSize, smallSize) {
     const sz = p.isSmall ? smallSize : mainSize;
     totalW += font.getAdvanceWidth(p.text, sz, { kerning: true });
   }
-  const maxW = 104; // Evitar que invada la siguiente columna o salga del borde
-  const scale = totalW > maxW ? (maxW / totalW) : 1;
+  // Evitar que invada la siguiente columna o salga del borde
+  const scale = (maxW > 0 && totalW > maxW) ? (maxW / totalW) : 1;
 
   let curX = x;
   let combinedD = '';
@@ -731,17 +733,17 @@ function generatePlateSVG(machine, runtimeOverrides = {}, options = {}) {
   if (templateId === 'zybra_unica') {
     // Textos fijos de cabecera y pie convertidos a curvas exactas
     dynamicPaths.push(textToPathElement('CorporateA-Regular', 'Name:', 135.93, 38.65, 9));
-    dynamicPaths.push(textToPathElement('CorporateA-SemiBold', primaryName, 189.47, 38.07, 24, { maxWidth: 218 }));
+    dynamicPaths.push(textToPathElement('CorporateA-SemiBold', primaryName, 189.47, 38.07, 24, { maxWidth: 216 }));
 
     dynamicPaths.push(textToPathElement('CorporateA-Regular', 'Model:', 136.38, 66.11, 9));
-    dynamicPaths.push(textToPathElement('CorporateA-Italic', primaryModel, 189.47, 66.32, 24, { maxWidth: 218 }));
+    dynamicPaths.push(textToPathElement('CorporateA-Italic', primaryModel, 189.47, 66.32, 24, { maxWidth: 216 }));
 
     dynamicPaths.push(textToPathElement('CorporateA-Regular', 'zybra.de.com / support@zybra.de.com', 134.19, 95.31, 7));
 
     // Serial number arriba a la derecha
     dynamicPaths.push(textToPathElement('CorporateA-Regular', 'Serial number:', 301.08, 95.31, 7));
     if (serialNumber) {
-      dynamicPaths.push(textToPathElement('CorporateA-Regular', serialNumber, 348.50, 95.31, 7, { maxWidth: 62 }));
+      dynamicPaths.push(textToPathElement('CorporateA-Regular', serialNumber, 348.50, 95.31, 7, { maxWidth: 60 }));
     }
 
     // Bloques Técnicos (Etiqueta en negro + Rectángulo negro con valor en tipografía blanca)
@@ -800,10 +802,10 @@ function generatePlateSVG(machine, runtimeOverrides = {}, options = {}) {
     if (isLarge) {
       // Cabecera derecha: Type (Modelo) y Machine (Nombre)
       dynamicPaths.push(textToPathElement('UniversLTStd-Cn', 'Type:', 218.11, 29.85, mainFontSize));
-      dynamicPaths.push(textToPathElement('UniversLTStd-Cn', primaryModel, 218.11, 44.25, mainFontSize, { maxWidth: 55 }));
+      dynamicPaths.push(textToPathElement('UniversLTStd-Cn', primaryModel, 218.11, 44.25, mainFontSize, { maxWidth: 46 }));
 
       dynamicPaths.push(textToPathElement('UniversLTStd-Cn', 'Machine:', 269.66, 30.09, mainFontSize));
-      dynamicPaths.push(textToPathElement('UniversLTStd-Cn', primaryName, 269.66, 44.49, mainFontSize, { maxWidth: 136 }));
+      dynamicPaths.push(textToPathElement('UniversLTStd-Cn', primaryName, 269.66, 44.49, mainFontSize, { maxWidth: 132 }));
 
       // Datos fijos empresa izquierda
       dynamicPaths.push(textToPathElement('UniversLTStd-Cn', 'Vorma Maschinen', 18.60, 107.08, mainFontSize));
@@ -817,7 +819,7 @@ function generatePlateSVG(machine, runtimeOverrides = {}, options = {}) {
       // Serial Number abajo a la izquierda
       dynamicPaths.push(textToPathElement('UniversLTStd-Cn', 'Serial Number:', 68.06, 222.57, mainFontSize));
       if (serialNumber) {
-        dynamicPaths.push(textToPathElement('UniversLTStd-Cn', serialNumber, 68.06, 236.97, mainFontSize, { maxWidth: 125 }));
+        dynamicPaths.push(textToPathElement('UniversLTStd-Cn', serialNumber, 68.06, 236.97, mainFontSize, { maxWidth: 124 }));
       }
     } else {
       // Vorma Pequeña (110 x 70 mm)
@@ -825,7 +827,7 @@ function generatePlateSVG(machine, runtimeOverrides = {}, options = {}) {
       dynamicPaths.push(textToPathElement('UniversLTStd-Cn', primaryModel, 161.44, 34.42, mainFontSize, { maxWidth: 52 }));
 
       dynamicPaths.push(textToPathElement('UniversLTStd-Cn', 'Machine:', 219.57, 23.41, mainFontSize));
-      dynamicPaths.push(textToPathElement('UniversLTStd-Cn', primaryName, 219.57, 34.61, mainFontSize, { maxWidth: 85 }));
+      dynamicPaths.push(textToPathElement('UniversLTStd-Cn', primaryName, 219.57, 34.61, mainFontSize, { maxWidth: 70 }));
 
       dynamicPaths.push(textToPathElement('UniversLTStd-Cn', 'Vorma Maschinen', 23.98, 79.97, mainFontSize));
       dynamicPaths.push(textToPathElement('UniversLTStd-Cn', 'www.vormasmachinen.com', 23.98, 95.87, mainFontSize));
@@ -836,28 +838,30 @@ function generatePlateSVG(machine, runtimeOverrides = {}, options = {}) {
 
       dynamicPaths.push(textToPathElement('UniversLTStd-Cn', 'Serial Number:', 47.19, 173.11, mainFontSize));
       if (serialNumber) {
-        dynamicPaths.push(textToPathElement('UniversLTStd-Cn', serialNumber, 47.19, 184.31, mainFontSize, { maxWidth: 96 }));
+        dynamicPaths.push(textToPathElement('UniversLTStd-Cn', serialNumber, 47.19, 184.31, mainFontSize, { maxWidth: 94 }));
       }
     }
 
     // Tabla técnica modular (distribución dinámica en 2 columnas según cantidad de parámetros)
     const leftSlots = slots.filter(s => s.col === 'left' && s.enabled !== false);
     const rightSlots = slots.filter(s => s.col === 'right' && s.enabled !== false);
+    const leftMaxW = isLarge ? 72 : 51;
+    const rightMaxW = isLarge ? 102 : 67;
 
     leftSlots.forEach((slot, idx) => {
       const c = getVormaSlotCoord(templateId, 'left', idx, leftSlots.length);
       if (!c) return;
       const lbl = slot.label ? (slot.label.endsWith(':') ? slot.label : `${slot.label}:`) : '';
-      if (lbl) dynamicPaths.push(textToPathElement('UniversLTStd-Cn', lbl, c.labelX, c.labelY, mainFontSize));
-      if (slot.value) dynamicPaths.push(renderVormaValuePaths(slot.value, c.valX, c.valY, mainFontSize, unitFontSize));
+      if (lbl) dynamicPaths.push(textToPathElement('UniversLTStd-Cn', lbl, c.labelX, c.labelY, mainFontSize, { maxWidth: leftMaxW }));
+      if (slot.value) dynamicPaths.push(renderVormaValuePaths(slot.value, c.valX, c.valY, mainFontSize, unitFontSize, leftMaxW));
     });
 
     rightSlots.forEach((slot, idx) => {
       const c = getVormaSlotCoord(templateId, 'right', idx, rightSlots.length);
       if (!c) return;
       const lbl = slot.label ? (slot.label.endsWith(':') ? slot.label : `${slot.label}:`) : '';
-      if (lbl) dynamicPaths.push(textToPathElement('UniversLTStd-Cn', lbl, c.labelX, c.labelY, mainFontSize));
-      if (slot.value) dynamicPaths.push(renderVormaValuePaths(slot.value, c.valX, c.valY, mainFontSize, unitFontSize));
+      if (lbl) dynamicPaths.push(textToPathElement('UniversLTStd-Cn', lbl, c.labelX, c.labelY, mainFontSize, { maxWidth: rightMaxW }));
+      if (slot.value) dynamicPaths.push(renderVormaValuePaths(slot.value, c.valX, c.valY, mainFontSize, unitFontSize, rightMaxW));
     });
   }
 
@@ -871,18 +875,21 @@ function generatePlateSVG(machine, runtimeOverrides = {}, options = {}) {
 
     if (isLarge) {
       // Cabecera: Typ y Model
-      dynamicPaths.push(textToPathElement(fontKey, 'Typ:', 23.97, 20.06, 8));
-      dynamicPaths.push(textToPathElement(fontKey, primaryName, 24.82, 49.16, 15, { maxWidth: 92 }));
-
       // En los SVG de Olsen Grande, si el modelo es largo (ej. DUO AUTO), empieza en x=106.81; si es corto (600), en 122.3
       const modelX = primaryModel.length > 5 ? 106.81 : 122.30;
+      const nameMaxW = Math.max(40, +(modelX - 24.82 - 6).toFixed(2));
+      const modelMaxW = Math.max(60, +(200 - modelX).toFixed(2));
+
+      dynamicPaths.push(textToPathElement(fontKey, 'Typ:', 23.97, 20.06, 8));
+      dynamicPaths.push(textToPathElement(fontKey, primaryName, 24.82, 49.16, 15, { maxWidth: nameMaxW }));
+
       dynamicPaths.push(textToPathElement(fontKey, 'Model:', modelX, 20.06, 8));
-      dynamicPaths.push(textToPathElement(fontKey, primaryModel, modelX, 48.79, 15, { maxWidth: 96 }));
+      dynamicPaths.push(textToPathElement(fontKey, primaryModel, modelX, 48.79, 15, { maxWidth: modelMaxW }));
 
       // Nº de Serie arriba a la derecha (en la misma línea que Nº:)
       dynamicPaths.push(textToPathElement(fontKey, 'Nº:', 308.81, 16.80, 8));
       if (serialNumber) {
-        dynamicPaths.push(textToPathElement(fontKey, serialNumber, 326.50, 16.80, 8, { maxWidth: 88 }));
+        dynamicPaths.push(textToPathElement(fontKey, serialNumber, 326.50, 16.80, 8, { maxWidth: 85 }));
       }
 
       // Pie de placa: web, Manufacture date: y valor dentro del recuadro inferior derecho
@@ -899,10 +906,10 @@ function generatePlateSVG(machine, runtimeOverrides = {}, options = {}) {
     } else {
       // Olsen & Kael Pequeña (110 x 70 mm)
       dynamicPaths.push(textToPathElement(fontKey, 'Typ:', 15.78, 27.24, 8));
-      dynamicPaths.push(textToPathElement(fontKey, primaryName, 15.69, 51.46, 13, { maxWidth: 54 }));
+      dynamicPaths.push(textToPathElement(fontKey, primaryName, 15.69, 51.46, 13, { maxWidth: 51 }));
 
       dynamicPaths.push(textToPathElement(fontKey, 'Model:', 73.46, 27.24, 8));
-      dynamicPaths.push(textToPathElement(fontKey, primaryModel, 72.18, 50.91, 13, { maxWidth: 104 }));
+      dynamicPaths.push(textToPathElement(fontKey, primaryModel, 72.18, 50.91, 13, { maxWidth: 102 }));
 
       dynamicPaths.push(textToPathElement(fontKey, 'Nº:', 188.92, 48.43, 8));
       if (serialNumber) {
